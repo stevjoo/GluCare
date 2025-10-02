@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mapmidtermproject.activities.AnalysisActivity
+import com.example.mapmidtermproject.activities.NewsActivity
 import com.google.android.material.card.MaterialCardView
 
 class MainActivity : AppCompatActivity() {
@@ -20,15 +22,15 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Membuka peta lokasi...", Toast.LENGTH_SHORT).show()
         }
 
-        // Aksi untuk menu Analisis Foto
+        // Aksi untuk menu Analisis Foto (SUDAH DIPERBARUI)
         cardPhotoAnalysis.setOnClickListener {
-            // Anda perlu membuat AnalysisActivity.kt
-            Toast.makeText(this, "Membuka halaman analisis foto...", Toast.LENGTH_SHORT).show()
+            // Pindah ke halaman Analisis Foto
+            val intent = Intent(this, AnalysisActivity::class.java)
+            startActivity(intent)
         }
 
-        // Aksi untuk menu Berita (SUDAH DIPERBARUI)
+        // Aksi untuk menu Berita
         cardNews.setOnClickListener {
-            // Pindah ke halaman Berita
             val intent = Intent(this, NewsActivity::class.java)
             startActivity(intent)
         }
