@@ -6,4 +6,12 @@
     </style>
 
     <style name="Theme.MAPMidTermProject" parent="Base.Theme.MAPMidTermProject" />
+
+    <style name="Theme.MAPMidTermProject.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white_primary</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/glucaremobileapplogo</item>
+        <item name="windowSplashScreenAnimationDuration">2000</item>
+        <item name="postSplashScreenTheme">@style/Theme.MAPMidTermProject</item>
+    </style>
+
 </resources>
