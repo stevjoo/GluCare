@@ -4,10 +4,14 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="true" />
+        android:required="false" /> <queries>
+    <package android:name="com.google.android.apps.maps" />
+</queries>
 
     <application
         android:allowBackup="true"
@@ -22,15 +26,21 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.MAPMidTermProject.Splash">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:theme="@style/Theme.MAPMidTermProject.Splash"> <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
         </activity>
 
-        <activity android:name=".activities.NewsActivity" android:exported="false" />
-        <activity android:name=".activities.AnalysisActivity" android:exported="false" />
+        <activity
+            android:name=".activities.NewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AnalysisActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.LocationActivity"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
