@@ -1,5 +1,6 @@
 package com.example.mapmidtermproject.activities
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
@@ -23,7 +24,6 @@ class AnalysisActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
     private var tempImageUri: Uri? = null
 
-    // Launcher untuk mengambil gambar dari kamera
     private val cameraLauncher = registerForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { isSuccess ->
@@ -34,7 +34,6 @@ class AnalysisActivity : AppCompatActivity() {
         }
     }
 
-    // Launcher untuk memilih gambar dari galeri
     private val galleryLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -66,15 +65,13 @@ class AnalysisActivity : AppCompatActivity() {
         }
     }
 
-    // Fungsi untuk membuat Uri sementara DENGAN NAMA FILE UNIK
     private fun createTempUri(): Uri {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val imageFile = File.createTempFile(
             "JPEG_${timeStamp}_",
             ".jpg",
-            applicationContext.cacheDir // Menggunakan cache directory yang lebih aman
+            applicationContext.cacheDir
         )
-        // Menyimpan Uri ke variabel global untuk diakses oleh cameraLauncher
         tempImageUri = FileProvider.getUriForFile(applicationContext, "${applicationContext.packageName}.provider", imageFile)
         return tempImageUri as Uri
     }
@@ -84,20 +81,15 @@ class AnalysisActivity : AppCompatActivity() {
         val options = arrayOf("Buka Kamera", "Pilih dari Galeri")
         AlertDialog.Builder(this)
             .setTitle("Pilih Sumber Gambar")
-            .setItems(options) { dialog, which ->
+            .setItems(options) { _, which ->
                 when (which) {
-                    0 -> {
-                        // Buat Uri baru setiap kali kamera akan dibuka
-                        val uri = createTempUri()
-                        cameraLauncher.launch(uri)
-                    }
+                    0 -> cameraLauncher.launch(createTempUri())
                     1 -> galleryLauncher.launch("image/*")
                 }
             }
             .show()
     }
 
-    // Fungsi untuk menampilkan dialog hasil (tidak berubah)
     private fun showResultDialog() {
         val isDiabetic = Random.nextBoolean()
 
@@ -105,8 +97,9 @@ class AnalysisActivity : AppCompatActivity() {
         if (isDiabetic) {
             builder.setTitle("Hasil Analisis: Risiko Terdeteksi")
             builder.setMessage("Berdasarkan analisis, luka Anda memiliki kemungkinan ciri-ciri luka diabetes. Segera konsultasikan dengan dokter.")
+            // DIUBAH: Tombol ini sekarang membuka LocationActivity
             builder.setPositiveButton("Cek Lokasi Terdekat") { _, _ ->
-                Toast.makeText(this, "Membuka fitur pencarian lokasi...", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, LocationActivity::class.java))
             }
             builder.setNegativeButton("Tutup") { dialog, _ ->
                 dialog.dismiss()
