@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "672379213921",
+    "project_id": "glucare-600d2",
+    "storage_bucket": "glucare-600d2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672379213921:android:dd5252869f6538665ab220",
+        "android_client_info": {
+          "package_name": "com.example.mapmidtermproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "672379213921-b2hls1a2cfm9sc055s5kq4jnc2svbpm0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mapmidtermproject",
+            "certificate_hash": "59b84849fec915260b1f2a517df4bb23995199c3"
+          }
+        },
+        {
+          "client_id": "672379213921-51g9k7rg7e8rb6sc1adcojj32b2a418v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfZXEbgYgJY587y9o73N4dxmvV5lW3cME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "672379213921-51g9k7rg7e8rb6sc1adcojj32b2a418v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
