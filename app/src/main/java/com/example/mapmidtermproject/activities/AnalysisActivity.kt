@@ -1,5 +1,6 @@
 package com.example.mapmidtermproject.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -9,12 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import com.example.mapmidtermproject.R
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.random.Random
 
 class AnalysisActivity : AppCompatActivity() {
@@ -22,27 +18,31 @@ class AnalysisActivity : AppCompatActivity() {
     private lateinit var ivWoundImage: ImageView
     private lateinit var btnStartAnalysis: Button
     private var currentImageUri: Uri? = null
-    private var tempImageUri: Uri? = null
 
-    private val cameraLauncher = registerForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { isSuccess ->
-        if (isSuccess) {
-            currentImageUri = tempImageUri
-            ivWoundImage.setImageURI(currentImageUri)
-            btnStartAnalysis.isEnabled = true
+    // Launcher untuk kamera custom (CameraActivity)
+    private val cameraActivityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                // ambil URI string dari CameraActivity
+                val uriStr = result.data?.getStringExtra("captured_uri")
+                if (!uriStr.isNullOrEmpty()) {
+                    val uri = Uri.parse(uriStr)
+                    currentImageUri = uri
+                    ivWoundImage.setImageURI(uri)
+                    btnStartAnalysis.isEnabled = true
+                }
+            }
         }
-    }
 
-    private val galleryLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            currentImageUri = it
-            ivWoundImage.setImageURI(it)
-            btnStartAnalysis.isEnabled = true
+    // Launcher untuk pilih gambar dari galeri (tetap seperti sebelumnya)
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                currentImageUri = it
+                ivWoundImage.setImageURI(it)
+                btnStartAnalysis.isEnabled = true
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,9 +52,7 @@ class AnalysisActivity : AppCompatActivity() {
         val btnSelectImage: Button = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
 
-        btnSelectImage.setOnClickListener {
-            showImageSourceDialog()
-        }
+        btnSelectImage.setOnClickListener { showImageSourceDialog() }
 
         btnStartAnalysis.setOnClickListener {
             if (currentImageUri != null) {
@@ -65,39 +63,36 @@ class AnalysisActivity : AppCompatActivity() {
         }
     }
 
-    private fun createTempUri(): Uri {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val imageFile = File.createTempFile(
-            "JPEG_${timeStamp}_",
-            ".jpg",
-            applicationContext.cacheDir
-        )
-        tempImageUri = FileProvider.getUriForFile(applicationContext, "${applicationContext.packageName}.provider", imageFile)
-        return tempImageUri as Uri
-    }
-
-
+    // Dialog sumber gambar: Kamera custom atau Galeri
     private fun showImageSourceDialog() {
         val options = arrayOf("Buka Kamera", "Pilih dari Galeri")
         AlertDialog.Builder(this)
             .setTitle("Pilih Sumber Gambar")
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> cameraLauncher.launch(createTempUri())
+                    0 -> openInAppCamera()
                     1 -> galleryLauncher.launch("image/*")
                 }
             }
             .show()
     }
 
+    private fun openInAppCamera() {
+        val intent = Intent(this, CameraActivity::class.java)
+        cameraActivityLauncher.launch(intent)
+    }
+
+    // --- Bagian hasil analisis (tetap) ---
     private fun showResultDialog() {
         val isDiabetic = Random.nextBoolean()
 
         val builder = AlertDialog.Builder(this)
         if (isDiabetic) {
             builder.setTitle("Hasil Analisis: Risiko Terdeteksi")
-            builder.setMessage("Berdasarkan analisis, luka Anda memiliki kemungkinan ciri-ciri luka diabetes. Segera konsultasikan dengan dokter.")
-            // DIUBAH: Tombol ini sekarang membuka LocationActivity
+            builder.setMessage(
+                "Berdasarkan analisis, luka Anda memiliki kemungkinan ciri-ciri luka diabetes. " +
+                        "Segera konsultasikan dengan dokter."
+            )
             builder.setPositiveButton("Cek Lokasi Terdekat") { _, _ ->
                 startActivity(Intent(this, LocationActivity::class.java))
             }
@@ -111,7 +106,6 @@ class AnalysisActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
         }
-        val dialog = builder.create()
-        dialog.show()
+        builder.create().show()
     }
 }
