@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -16,18 +15,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.mapmidtermproject.R
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
 import kotlin.random.Random
 
 class AnalysisActivity : AppCompatActivity() {
 
     private lateinit var ivWoundImage: ImageView
     private lateinit var tvPlaceholderText: TextView
-    private lateinit var btnStartAnalysis: Button
+    private lateinit var btnSelectImage: MaterialButton
+    private lateinit var btnStartAnalysis: MaterialButton
     private var currentImageUri: Uri? = null
 
-
-
-    // Kamera custom (CameraActivity)
     private val cameraActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -36,7 +34,6 @@ class AnalysisActivity : AppCompatActivity() {
             }
         }
 
-    // Pilih dari galeri
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { onImageSelected(it) }
@@ -46,88 +43,57 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
-        // Top app bar (back to dashboard)
-        findViewById<MaterialToolbar>(R.id.topAppBar)?.setNavigationOnClickListener { finish() }
+        findViewById<MaterialToolbar>(R.id.topAppBar)
+            .setNavigationOnClickListener { finish() }
 
         ivWoundImage = findViewById(R.id.ivWoundImage)
         tvPlaceholderText = findViewById(R.id.tvPlaceholderText)
-        val btnSelectImage: Button = findViewById(R.id.btnSelectImage)
+        btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
 
         setAnalysisButtonEnabled(false)
 
-        // Buka pilihan sumber gambar
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
-        // Placeholder juga clickable
         ivWoundImage.setOnClickListener { showImageSourceDialog() }
         tvPlaceholderText.setOnClickListener { showImageSourceDialog() }
 
         btnStartAnalysis.setOnClickListener {
             if (currentImageUri != null) showResultDialog()
-            else Toast.makeText(
-                this,
-                "Silakan pilih/ambil gambar terlebih dahulu.",
-                Toast.LENGTH_SHORT
-            ).show()
+            else Toast.makeText(this, "Silakan pilih/ambil gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun onImageSelected(uri: Uri) {
         currentImageUri = uri
-
-        // Ubah placeholder jadi tampilan foto penuh yang rapi
         ivWoundImage.apply {
             setImageURI(uri)
             val lp = layoutParams
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT
             layoutParams = lp
-
-            setPadding(0, 0, 0, 0)
             scaleType = ImageView.ScaleType.CENTER_CROP
             background = null
             imageTintList = null
         }
         tvPlaceholderText.visibility = View.GONE
-
         setAnalysisButtonEnabled(true)
     }
 
     private fun setAnalysisButtonEnabled(enabled: Boolean) {
         btnStartAnalysis.isEnabled = enabled
         if (enabled) {
-            // aktif → biru GluCare + teks putih
-            try {
-                btnStartAnalysis.setBackgroundResource(R.drawable.gc_btn_primary)
-                btnStartAnalysis.setTextColor(
-                    ContextCompat.getColor(this, android.R.color.white)
-                )
-            } catch (_: Exception) {
-                // fallback kalau drawable belum ada
-                btnStartAnalysis.setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.blue)
-                )
-                btnStartAnalysis.setTextColor(
-                    ContextCompat.getColor(this, android.R.color.white)
-                )
-            }
+            // aktif
+            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_active))
+            btnStartAnalysis.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, android.R.color.white)
         } else {
-            // nonaktif → abu terang + teks abu
-            try {
-                btnStartAnalysis.setBackgroundResource(R.drawable.gc_btn_disabled)
-                btnStartAnalysis.setTextColor(
-                    ContextCompat.getColor(this, R.color.gray_text_disabled)
-                )
-            } catch (_: Exception) {
-                btnStartAnalysis.setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.gray_light)
-                )
-                btnStartAnalysis.setTextColor(0xFF7F7F7F.toInt())
-            }
+            // nonaktif
+            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_disabled))
+            btnStartAnalysis.setTextColor(ContextCompat.getColor(this, R.color.gray_text_disabled))
+            btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, R.color.gray_text_disabled)
         }
     }
 
-    // Dialog sumber gambar
     private fun showImageSourceDialog() {
         val options = arrayOf("Buka Kamera", "Pilih dari Galeri")
         AlertDialog.Builder(this)
@@ -146,11 +112,9 @@ class AnalysisActivity : AppCompatActivity() {
         cameraActivityLauncher.launch(intent)
     }
 
-    // Hasil analisis (dummy untuk UAS)
     private fun showResultDialog() {
         val isDiabetic = Random.nextBoolean()
         val builder = AlertDialog.Builder(this)
-
         if (isDiabetic) {
             builder.setTitle("Peringatan: Indikasi Ditemukan")
             builder.setMessage(
@@ -169,7 +133,6 @@ class AnalysisActivity : AppCompatActivity() {
             )
             builder.setPositiveButton("Oke, Mengerti") { d, _ -> d.dismiss() }
         }
-
         builder.create().show()
     }
 }
