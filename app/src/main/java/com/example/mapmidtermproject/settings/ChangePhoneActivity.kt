@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapmidtermproject.R
+import com.example.mapmidtermproject.utils.PreferenceHelper
 
 class ChangePhoneActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,16 +17,19 @@ class ChangePhoneActivity : AppCompatActivity() {
         val etNewPhone = findViewById<EditText>(R.id.etNewPhone)
         val btnSave = findViewById<Button>(R.id.btnSavePhone)
 
+        val pref = PreferenceHelper(this) // ✅ DITAMBAHKAN
+
         btnSave.setOnClickListener {
             val phone = etNewPhone.text.toString().trim()
             if (phone.isEmpty()) {
                 Toast.makeText(this, "Nomor telepon tidak boleh kosong", Toast.LENGTH_SHORT).show()
             } else {
-                // TODO: Tambahkan logika simpan nomor baru ke database / API
+                pref.savePhone(phone)
                 Toast.makeText(this, "Nomor telepon berhasil diperbarui", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
+
         val btnBack = findViewById<ImageView>(R.id.btnBack)
         btnBack.setOnClickListener {
             finish()
