@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white_primary">
+
+    <RelativeLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/white_primary"
+        android:paddingHorizontal="24dp"
+        android:elevation="8dp">
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_left"
+            app:tint="@color/blue"
+            android:contentDescription="Kembali"
+            android:clickable="true"
+            android:focusable="true" />
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:text="Privacy Policy"
+            android:textColor="@color/blue"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="56dp"
+        android:background="@color/gray" />
+    <ScrollView
+        android:id="@+id/privacyScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="57dp"
+        android:padding="24dp"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/privacyContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:text="1. Pendahuluan
+Kebijakan Privasi ini disusun untuk menjelaskan bagaimana GluCare mengumpulkan, menyimpan, dan mengelola informasi yang diberikan oleh User selama menggunakan aplikasi. Dengan tujuan membantu User dalam memonitor dan mengelola penggunaan aplikasi GluCare secara nyaman dan aman, kami berkomitmen menjaga privasi dan kenyamanan setiap User.
+
+2. Definisi
+Aplikasi: Mengacu pada aplikasi GluCare, platform digital yang digunakan untuk mendukung pengalaman monitoring dan penggunaan fitur terkait.
+User: Individu yang menggunakan aplikasi GluCare dan memiliki akses terhadap fitur di dalamnya.
+Informasi Penggunaan Aplikasi: Data yang berkaitan dengan aktivitas User di dalam aplikasi, termasuk tetapi tidak terbatas pada nama akun, nomor telepon, preferensi penggunaan, dan interaksi dengan fitur aplikasi.
+
+3. Informasi yang Dikumpulkan
+GluCare dapat mengumpulkan beberapa jenis informasi dari User, meliputi namun tidak terbatas pada:
+• Informasi Akun: Nama, nomor telepon, dan data lain yang dimasukkan saat pendaftaran atau pengaturan akun.
+• Data Aktivitas Aplikasi: Preferensi fitur, interaksi dengan menu, pengaturan akun, dan aktivitas lainnya yang terjadi di dalam aplikasi.
+• Data Teknis (jika diperlukan untuk pengembangan): Tipe perangkat, sistem operasi, versi aplikasi, serta log penggunaan aplikasi.
+
+4. Tujuan Penggunaan Informasi
+Informasi yang dikumpulkan digunakan untuk:
+• Memungkinkan User mengakses dan menggunakan fitur aplikasi secara optimal.
+• Menyediakan pengalaman penggunaan yang lebih personal dan relevan.
+• Mendukung pengembangan fitur dan peningkatan kualitas aplikasi.
+• Menyediakan bantuan atau respon jika User menghubungi tim dukungan.
+
+5. Keamanan Informasi
+GluCare menerapkan langkah-langkah pengamanan yang wajar untuk melindungi informasi penggunaan aplikasi dari akses yang tidak berwenang. Namun, User memahami bahwa tidak ada sistem digital yang sepenuhnya bebas dari risiko.
+
+6. Hak User
+User memiliki hak untuk:
+• Mengubah atau memperbarui informasi akun (seperti nama atau nomor telepon) melalui menu pengaturan akun.
+• Menghubungi pihak pengelola aplikasi untuk permintaan penghapusan akun atau penghentian akses.
+• Menghentikan penggunaan aplikasi jika User tidak lagi menyetujui kebijakan ini.
+
+7. Batasan Tanggung Jawab
+GluCare tidak bertanggung jawab atas kerugian yang timbul akibat:
+• Kesalahan atau kelalaian User dalam menjaga keamanan perangkat atau akses akun.
+• Penggunaan aplikasi di luar konteks fungsi yang disediakan.
+• Gangguan teknis atau akses yang disebabkan oleh pihak ketiga.
+
+8. Perubahan Kebijakan
+Kebijakan ini dapat diperbarui sewaktu-waktu untuk menyesuaikan pengembangan aplikasi atau regulasi yang berlaku. GluCare akan memberikan pemberitahuan melalui aplikasi jika terdapat pembaruan penting.
+
+9. Kontak dan Dukungan
+Jika User memiliki pertanyaan atau memerlukan dukungan, User dapat menghubungi tim pengelola melalui kanal bantuan atau pusat dukungan yang tersedia di aplikasi.
+
+10. Pernyataan Persetujuan
+Dengan melanjutkan penggunaan aplikasi GluCare, User menyatakan telah membaca, memahami, dan menyetujui seluruh isi Kebijakan Privasi ini." />
+        </LinearLayout>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
