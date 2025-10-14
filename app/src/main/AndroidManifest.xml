@@ -9,9 +9,11 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" /> <queries>
-    <package android:name="com.google.android.apps.maps" />
-</queries>
+        android:required="false" />
+
+    <queries>
+        <package android:name="com.google.android.apps.maps" />
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -33,18 +35,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.LoginActivity" android:exported="false" />
-
         <activity
             android:name=".activities.NewsActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.AnalysisActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.LocationActivity"
-            android:exported="false" />
-        <!-- Settings Section -->
+
+        <activity android:name=".activities.LoginActivity" android:exported="false" />
+        <activity android:name=".activities.AnalysisActivity" android:exported="false" />
+        <activity android:name=".activities.LocationActivity" android:exported="false" />
         <activity android:name=".settings.SettingsActivity" android:exported="false" />
         <activity android:name=".settings.AccountSettingsActivity" android:exported="false" />
         <activity android:name=".settings.ChangeUsernameActivity" android:exported="false" />
@@ -61,7 +58,5 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
     </application>
-
 </manifest>
