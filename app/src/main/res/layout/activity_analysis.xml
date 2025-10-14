@@ -5,53 +5,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#EBFFFB"
+    android:fitsSystemWindows="true"
     tools:context=".activities.AnalysisActivity">
 
-    <!-- TOP APP BAR -->
+    <!-- TOP APP BAR (logo kiri, title benar2 center) -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#EBFFFB"
-        android:theme="@style/ThemeOverlay.Material3.ActionBar"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="#EBFFFB"
-            app:contentInsetLeft="0dp"
-            app:contentInsetRight="0dp"
-            app:contentInsetStart="0dp"
-            app:contentInsetStartWithNavigation="0dp"
-            app:navigationIcon="@drawable/ic_arrow_back_24">
+            android:background="#EBFFFB">
 
-            <!-- Custom center content: logo + title -->
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:paddingStart="56dp"
-                android:paddingEnd="56dp">
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
 
                 <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginEnd="6dp"
+                    android:id="@+id/ivLogo"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="55dp"
                     android:contentDescription="Logo GluCare"
-                    android:src="@drawable/glucareicon" />
+                    android:src="@drawable/glucareicon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/tvTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Analisis Foto Luka"
                     android:textColor="#002021"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
-
-
-            </LinearLayout>
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -108,10 +107,7 @@
                         android:textAlignment="center"
                         android:textColor="#5A6A6B"
                         android:textSize="13sp" />
-
-
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <!-- BUTTONS -->
