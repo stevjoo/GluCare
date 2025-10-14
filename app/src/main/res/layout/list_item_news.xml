@@ -1,43 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="8dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:background="@drawable/rounded_card"
+    android:layout_marginBottom="8dp">
+
+    <ImageView
+        android:id="@+id/newsImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/sample_image" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_marginStart="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/tvNewsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Judul Berita"
-            android:textSize="18sp"
+            android:id="@+id/newsTitle"
+            android:text="Lorem Ipsum"
             android:textStyle="bold"
-            android:textColor="@android:color/black"/>
-
-        <TextView
-            android:id="@+id/tvNewsDate"
+            android:textSize="16sp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tanggal Publikasi"
-            android:textSize="12sp"
-            android:layout_marginTop="4dp"/>
+            android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/tvNewsSummary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Ini adalah ringkasan singkat dari isi berita atau artikel mengenai diabetes..."
-            android:textSize="14sp" />
-
+            android:id="@+id/newsDesc"
+            android:text="Lorem ipsum dolor sit amet..."
+            android:textSize="13sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

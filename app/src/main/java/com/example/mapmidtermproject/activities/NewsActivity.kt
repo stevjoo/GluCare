@@ -3,22 +3,48 @@ package com.example.mapmidtermproject.activities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.mapmidtermproject.models.NewsArticle
+import androidx.viewpager2.widget.ViewPager2
 import com.example.mapmidtermproject.R
+import com.example.mapmidtermproject.adapters.CarouselAdapter
 import com.example.mapmidtermproject.adapters.NewsAdapter
+import com.example.mapmidtermproject.models.NewsArticle
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class NewsActivity : AppCompatActivity() {
+
+    private lateinit var carouselViewPager: ViewPager2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news)
 
-        val rvNews: RecyclerView = findViewById(R.id.rvNews)
+        // --- Carousel setup ---
+        carouselViewPager = findViewById(R.id.carouselViewPager)
+        val carouselImages = listOf(
+            R.drawable.sample_banner,
+            R.drawable.glucaremobileapplogo,
+            R.drawable.sample_image
+        )
+        carouselViewPager.adapter = CarouselAdapter(carouselImages)
+
+        // --- RecyclerView setup ---
+        val rvNews: androidx.recyclerview.widget.RecyclerView = findViewById(R.id.rvNews)
         rvNews.layoutManager = LinearLayoutManager(this)
 
         val dummyNews = createDummyNewsData()
         val adapter = NewsAdapter(dummyNews)
         rvNews.adapter = adapter
+
+        // --- Bottom Nav setup ---
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_home -> true
+                R.id.nav_camera -> true
+                R.id.nav_profile -> true
+                else -> false
+            }
+        }
     }
 
     private fun createDummyNewsData(): List<NewsArticle> {
