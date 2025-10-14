@@ -36,7 +36,7 @@ class NewsActivity : AppCompatActivity() {
         }
 
         // 3. Jika sudah login, tampilkan layout
-        setContentView(R.layout.activity_news)
+        setContentView(R.layout.activity_main)
 
         // --- Carousel setup ---
         carouselViewPager = findViewById(R.id.carouselViewPager)

@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@color/white_primary">
+
     <RelativeLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/white_primary"
-        android:paddingHorizontal="24dp"
-        android:elevation="0dp">
-
+        android:background="@color/white_primary">
         <TextView
             android:id="@+id/titleText"
             android:layout_width="wrap_content"
@@ -24,18 +22,13 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="56dp"
-        android:background="@android:color/transparent" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="57dp"
-        android:padding="24dp"
-        android:fillViewport="true">
+        android:layout_below="@id/headerLayout"
+        android:layout_above="@+id/bottom_navigation"
+        android:fillViewport="true"
+        android:padding="24dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,14 +41,12 @@
                 android:orientation="vertical"
                 android:padding="12dp"
                 android:layout_marginBottom="16dp">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Username"
                     android:textColor="@color/black"
                     android:textSize="14sp"/>
-
                 <TextView
                     android:id="@+id/tvUsername"
                     android:layout_width="wrap_content"
@@ -65,20 +56,17 @@
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:layout_marginBottom="12dp"/>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginBottom="8dp"
                     android:background="@color/blue" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Nomor Telepon"
                     android:textColor="@color/black"
                     android:textSize="14sp"/>
-
                 <TextView
                     android:id="@+id/tvPhone"
                     android:layout_width="wrap_content"
@@ -88,14 +76,12 @@
                     android:textStyle="bold"
                     android:textSize="16sp"/>
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/rounded_border"
                 android:orientation="vertical"
                 android:padding="8dp">
-
                 <LinearLayout
                     android:id="@+id/btnAccount"
                     android:layout_width="match_parent"
@@ -107,7 +93,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground">
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -115,20 +100,16 @@
                         android:text="Akun"
                         android:textSize="16sp"
                         android:textColor="@color/black" />
-
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_arrow_right"
                         app:tint="@color/blue" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/blue" />
-
-                <!-- FAQ -->
                 <LinearLayout
                     android:id="@+id/btnFAQ"
                     android:layout_width="match_parent"
@@ -140,7 +121,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground">
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -148,19 +128,16 @@
                         android:text="FAQ"
                         android:textSize="16sp"
                         android:textColor="@color/black" />
-
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_arrow_right"
                         app:tint="@color/blue" />
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/blue" />
-
                 <LinearLayout
                     android:id="@+id/btnPrivacyPolicy"
                     android:layout_width="match_parent"
@@ -172,7 +149,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground">
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -180,7 +156,6 @@
                         android:text="Kebijakan Privasi"
                         android:textSize="16sp"
                         android:textColor="@color/black" />
-
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -188,7 +163,6 @@
                         app:tint="@color/blue" />
                 </LinearLayout>
             </LinearLayout>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogout"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -206,4 +180,16 @@
         </LinearLayout>
     </ScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        style="@style/Widget.App.BottomNavigationView.NoRipple"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white_primary"
+        app:elevation="8dp"
+        app:itemIconTint="@color/blue"
+        app:itemTextColor="@color/blue"
+        app:menu="@menu/bottom_nav_menu" />
+
+</RelativeLayout>
