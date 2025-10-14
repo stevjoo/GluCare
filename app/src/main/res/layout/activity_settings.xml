@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
     android:layout_height="match_parent"
     android:background="@color/white_primary">
     <RelativeLayout
@@ -12,16 +13,6 @@
         android:paddingHorizontal="24dp"
         android:elevation="4dp">
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_arrow_left"
-            app:tint="@color/blue"
-            android:contentDescription="Kembali"
-            android:clickable="true"
-            android:focusable="true" />
         <TextView
             android:id="@+id/titleText"
             android:layout_width="wrap_content"
@@ -150,17 +141,20 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLogout"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:paddingVertical="12dp"
                 android:text="Keluar"
                 android:textColor="@color/blue"
                 android:textAllCaps="false"
-                android:background="@drawable/btn_logout_outline"
-                android:backgroundTint="@null"
-                android:layout_marginTop="24dp"
-                android:paddingVertical="10dp" />
+                app:cornerRadius="10dp"
+                app:rippleColor="@color/transparent_selector"
+                app:strokeColor="@color/blue"
+                app:strokeWidth="2dp" />
         </LinearLayout>
     </ScrollView>
 

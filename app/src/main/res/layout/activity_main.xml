@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E8F8F6"
+    android:background="@color/white_primary"
+    android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity">
 
     <LinearLayout
@@ -26,7 +27,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp">
+            android:paddingVertical="20dp">
 
             <TextView
                 android:layout_width="0dp"
@@ -61,6 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/white_primary"
+        style="@style/Widget.App.BottomNavigationView.NoRipple"
         app:elevation="8dp"
         app:itemIconTint="@color/blue"
         app:itemTextColor="@color/blue"
