@@ -1,78 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layout kamera untuk fitur Analisis Foto Luka -->
+<!-- Layout Kamera: Preview full, TopBar (Close/Flash), BottomBar (Galeri–Shutter–Flip) -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="@android:color/black"
+    android:fitsSystemWindows="true"
     tools:context=".activities.CameraActivity">
 
-    <!-- Preview kamera -->
+    <!-- PREVIEW -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:keepScreenOn="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Tombol Close (exit/cancel) -->
-    <ImageButton
-        android:id="@+id/btnClose"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="Close"
-        android:padding="8dp"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        app:tint="@android:color/white"
+    <!-- TOP OVERLAY: Close (left) + Flash (right) -->
+    <LinearLayout
+        android:id="@+id/topOverlay"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="#CC000000"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Bottom controls: Flash – Shutter – Flip -->
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="6dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:contentDescription="Tutup"
+            app:tint="@android:color/white"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:id="@+id/btnFlash"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="6dp"
+            android:src="@drawable/ic_baseline_flash_on_24"
+            android:contentDescription="Flash"
+            app:tint="@android:color/white"/>
+    </LinearLayout>
+
+    <!-- BOTTOM BAR: Galeri – Shutter – Flip -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="108dp"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:gravity="center"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="12dp"
+        android:background="#E6000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Flash -->
+        <!-- Galeri -->
         <ImageButton
-            android:id="@+id/btnFlash"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="Flash"
-            android:src="@drawable/ic_baseline_flash_on_24"
-            app:tint="@android:color/white" />
+            android:id="@+id/btnGallery"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="6dp"
+            android:src="@drawable/ic_placeholder_gallery"
+            android:contentDescription="Buka galeri"
+            app:tint="@android:color/white"/>
 
-        <!-- Shutter -->
-        <ImageButton
+        <!-- Shutter (FAB bulat) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnShutter"
-            android:layout_width="76dp"
-            android:layout_height="76dp"
-            android:layout_marginHorizontal="32dp"
-            android:background="@android:drawable/btn_default"
-            android:contentDescription="Shutter" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginEnd="40dp"
+            android:contentDescription="Ambil foto"
+            app:fabCustomSize="82dp"
+            app:useCompatPadding="true"
+            app:maxImageSize="40dp"
+            app:srcCompat="@drawable/ic_camera_24"
+            app:backgroundTint="@android:color/white"
+            app:tint="@color/blue"
+            app:elevation="6dp"
+            app:pressedTranslationZ="8dp"/>
 
         <!-- Flip kamera -->
         <ImageButton
             android:id="@+id/btnFlip"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="Flip"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="6dp"
             android:src="@android:drawable/ic_menu_rotate"
-            app:tint="@android:color/white" />
+            android:contentDescription="Ganti kamera"
+            app:tint="@android:color/white"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

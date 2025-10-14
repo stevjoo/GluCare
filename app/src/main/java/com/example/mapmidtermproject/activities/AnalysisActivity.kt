@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.mapmidtermproject.MainActivity
 import com.example.mapmidtermproject.R
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
@@ -26,6 +27,7 @@ class AnalysisActivity : AppCompatActivity() {
     private lateinit var btnStartAnalysis: MaterialButton
     private var currentImageUri: Uri? = null
 
+    // Launcher kamera custom
     private val cameraActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -34,6 +36,7 @@ class AnalysisActivity : AppCompatActivity() {
             }
         }
 
+    // Launcher galeri
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { onImageSelected(it) }
@@ -43,23 +46,35 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
-        findViewById<MaterialToolbar>(R.id.topAppBar)
-            .setNavigationOnClickListener { finish() }
-
+        // Bind views
+        val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
+        val ivLogo = findViewById<ImageView>(R.id.ivLogo)
         ivWoundImage = findViewById(R.id.ivWoundImage)
         tvPlaceholderText = findViewById(R.id.tvPlaceholderText)
         btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
 
+        // Logo klik → kembali ke dashboard
+        ivLogo.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            startActivity(intent)
+            finish()
+        }
+
+        // Tombol analisis awalnya nonaktif
         setAnalysisButtonEnabled(false)
 
+        // Event pilih gambar
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
         ivWoundImage.setOnClickListener { showImageSourceDialog() }
         tvPlaceholderText.setOnClickListener { showImageSourceDialog() }
 
+        // Mulai analisis
         btnStartAnalysis.setOnClickListener {
             if (currentImageUri != null) showResultDialog()
-            else Toast.makeText(this, "Silakan pilih/ambil gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
+            else Toast.makeText(this, "Silakan pilih atau ambil gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -67,10 +82,10 @@ class AnalysisActivity : AppCompatActivity() {
         currentImageUri = uri
         ivWoundImage.apply {
             setImageURI(uri)
-            val lp = layoutParams
-            lp.width = ViewGroup.LayoutParams.MATCH_PARENT
-            lp.height = ViewGroup.LayoutParams.MATCH_PARENT
-            layoutParams = lp
+            layoutParams = layoutParams.apply {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+            }
             scaleType = ImageView.ScaleType.CENTER_CROP
             background = null
             imageTintList = null
@@ -82,13 +97,13 @@ class AnalysisActivity : AppCompatActivity() {
     private fun setAnalysisButtonEnabled(enabled: Boolean) {
         btnStartAnalysis.isEnabled = enabled
         if (enabled) {
-            // aktif
-            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_active))
+            // Aktif
+            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.blue))
             btnStartAnalysis.setTextColor(ContextCompat.getColor(this, android.R.color.white))
             btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, android.R.color.white)
         } else {
-            // nonaktif
-            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_disabled))
+            // Nonaktif
+            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.gray_light))
             btnStartAnalysis.setTextColor(ContextCompat.getColor(this, R.color.gray_text_disabled))
             btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, R.color.gray_text_disabled)
         }
@@ -115,6 +130,7 @@ class AnalysisActivity : AppCompatActivity() {
     private fun showResultDialog() {
         val isDiabetic = Random.nextBoolean()
         val builder = AlertDialog.Builder(this)
+
         if (isDiabetic) {
             builder.setTitle("Peringatan: Indikasi Ditemukan")
             builder.setMessage(
@@ -133,6 +149,7 @@ class AnalysisActivity : AppCompatActivity() {
             )
             builder.setPositiveButton("Oke, Mengerti") { d, _ -> d.dismiss() }
         }
+
         builder.create().show()
     }
 }
