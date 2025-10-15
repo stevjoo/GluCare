@@ -5,6 +5,7 @@
     android:orientation="horizontal"
     android:background="@drawable/rounded_card"
     android:layout_marginBottom="12dp"
+    android:padding="8dp"
     android:gravity="center_vertical">
 
     <ImageView
@@ -12,8 +13,8 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/sample_image"
-        android:contentDescription="News article image" />
+        android:src="@drawable/ic_image_placeholder"
+        android:contentDescription="@string/news_image_desc" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -24,30 +25,29 @@
 
         <TextView
             android:id="@+id/tvNewsTitle"
-            android:text="5 Gejala Awal Diabetes yang Sering Diabaikan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp" />
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginBottom="4dp"
+            android:maxLines="2"
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/tvNewsDate"
-            android:text="2 Oktober 2025"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"/>
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:id="@+id/tvNewsSummary"
-            android:text="Banyak orang tidak menyadari tanda-tanda awal diabetes..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:textSize="14sp"
             android:maxLines="2"
-            android:ellipsize="end"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:ellipsize="end" />
     </LinearLayout>
 </LinearLayout>

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MAPMidTermProject</string>
+    <string name="news_image_desc">Gambar artikel berita</string>
+    <string name="back_button_desc">Kembali ke halaman sebelumnya</string>
+    <string name="article_image_desc">Gambar ilustrasi artikel</string>
+    <string name="title_informasi_diabetes">Informasi Diabetes</string>
 </resources>

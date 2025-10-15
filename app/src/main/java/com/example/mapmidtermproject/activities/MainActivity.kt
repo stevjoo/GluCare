@@ -10,7 +10,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.adapters.CarouselAdapter
 import com.example.mapmidtermproject.adapters.NewsAdapter
-import com.example.mapmidtermproject.models.NewsArticle
+import com.example.mapmidtermproject.data.DummyNewsData
 import com.example.mapmidtermproject.settings.SettingsActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -51,12 +51,13 @@ class MainActivity : AppCompatActivity() {
         carouselViewPager.adapter = CarouselAdapter(carouselImages)
 
         // RecyclerView setup with click listener
-        val rvNews: androidx.recyclerview.widget.RecyclerView = findViewById(R.id.rvNews)
+        val rvNews = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNews)
         rvNews.layoutManager = LinearLayoutManager(this)
 
-        val dummyNews = createDummyNewsData()
-        val adapter = NewsAdapter(dummyNews) { article ->
-            // Aksi yang dijalankan saat sebuah artikel di-klik
+        // Ambil data dari file terpisah
+        val newsList = DummyNewsData.getNewsList()
+
+        val adapter = NewsAdapter(newsList) { article ->
             val intent = Intent(this, NewsDetailActivity::class.java)
             intent.putExtra("EXTRA_ARTICLE", article)
             startActivity(intent)
@@ -85,43 +86,5 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
-    }
-
-    // Updated function to match the new NewsArticle model
-    private fun createDummyNewsData(): List<NewsArticle> {
-        val newsList = ArrayList<NewsArticle>()
-        val longContent = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
-
-        newsList.add(
-            NewsArticle(
-                1,
-                "5 Gejala Awal Diabetes yang Sering Diabaikan",
-                "Banyak orang tidak menyadari tanda-tanda awal diabetes.",
-                "2 Oktober 2025",
-                R.drawable.sample_image,
-                "Ini adalah konten lengkap untuk artikel 5 Gejala Awal Diabetes. " + longContent
-            )
-        )
-        newsList.add(
-            NewsArticle(
-                2,
-                "Pentingnya Pola Makan Sehat untuk Penderita Diabetes",
-                "Mengatur asupan makanan adalah kunci utama dalam mengelola diabetes.",
-                "1 Oktober 2025",
-                R.drawable.sample_image,
-                "Ini adalah konten lengkap untuk artikel Pola Makan Sehat. " + longContent
-            )
-        )
-        newsList.add(
-            NewsArticle(
-                3,
-                "Olahraga Ringan yang Aman Dilakukan Setiap Hari",
-                "Aktivitas fisik tidak harus berat. Berikut jenis olahraga ringan.",
-                "30 September 2025",
-                R.drawable.sample_image,
-                "Ini adalah konten lengkap untuk artikel Olahraga Ringan. " + longContent
-            )
-        )
-        return newsList
     }
 }

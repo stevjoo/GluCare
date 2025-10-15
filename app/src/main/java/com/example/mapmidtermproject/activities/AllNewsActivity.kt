@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.adapters.NewsAdapter
+import com.example.mapmidtermproject.data.NewsData // ← Tambahkan import ini
 import com.example.mapmidtermproject.models.NewsArticle
 
 class AllNewsActivity : AppCompatActivity() {
@@ -23,23 +24,14 @@ class AllNewsActivity : AppCompatActivity() {
         val rvAllNews: RecyclerView = findViewById(R.id.rvAllNews)
         rvAllNews.layoutManager = LinearLayoutManager(this)
 
-        val dummyNews = createDummyNewsData()
-        val adapter = NewsAdapter(dummyNews) { article ->
+        // Ambil data dari file terpisah
+        val newsList = NewsData.getNewsList()
+
+        val adapter = NewsAdapter(newsList) { article ->
             val intent = Intent(this, NewsDetailActivity::class.java)
             intent.putExtra("EXTRA_ARTICLE", article)
             startActivity(intent)
         }
         rvAllNews.adapter = adapter
-    }
-
-    // Anda bisa salin fungsi ini dari MainActivity atau buat data baru
-    private fun createDummyNewsData(): List<NewsArticle> {
-        val newsList = ArrayList<NewsArticle>()
-        // ... (Isi dengan semua data berita Anda)
-        newsList.add(NewsArticle(1, "5 Gejala Awal Diabetes yang Sering Diabaikan", "...", "2 Oktober 2025", R.drawable.sample_image, "Konten Lengkap..."))
-        newsList.add(NewsArticle(2, "Pentingnya Pola Makan Sehat untuk Penderita Diabetes", "...", "1 Oktober 2025", R.drawable.sample_image, "Konten Lengkap..."))
-        newsList.add(NewsArticle(3, "Olahraga Ringan yang Aman Dilakukan Setiap Hari", "...", "30 September 2025", R.drawable.sample_image, "Konten Lengkap..."))
-        // Tambahkan lebih banyak berita di sini
-        return newsList
     }
 }

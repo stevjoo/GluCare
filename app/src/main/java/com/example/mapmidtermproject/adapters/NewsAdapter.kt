@@ -9,26 +9,23 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.models.NewsArticle
 
-// Tambahkan parameter click listener
 class NewsAdapter(
     private val newsList: List<NewsArticle>,
-    private val onItemClicked: (NewsArticle) -> Unit
+    private val onItemClick: (NewsArticle) -> Unit
 ) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
     inner class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleTextView: TextView = itemView.findViewById(R.id.tvNewsTitle)
-        private val dateTextView: TextView = itemView.findViewById(R.id.tvNewsDate)
-        private val summaryTextView: TextView = itemView.findViewById(R.id.tvNewsSummary)
-        private val imageView: ImageView = itemView.findViewById(R.id.ivNewsImage)
+        val imageView: ImageView = itemView.findViewById(R.id.ivNewsImage)
+        val titleTextView: TextView = itemView.findViewById(R.id.tvNewsTitle)
+        val dateTextView: TextView = itemView.findViewById(R.id.tvNewsDate)
+        val summaryTextView: TextView = itemView.findViewById(R.id.tvNewsSummary)
 
-        fun bind(article: NewsArticle) {
-            titleTextView.text = article.title
-            dateTextView.text = article.date
-            summaryTextView.text = article.summary
-            imageView.setImageResource(article.imageResId)
-            // Set listener di sini
+        init {
             itemView.setOnClickListener {
-                onItemClicked(article)
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClick(newsList[position])
+                }
             }
         }
     }
@@ -40,8 +37,12 @@ class NewsAdapter(
     }
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
-        holder.bind(newsList[position])
+        val article = newsList[position]
+        holder.imageView.setImageResource(article.imageResId)
+        holder.titleTextView.text = article.title
+        holder.dateTextView.text = article.date
+        holder.summaryTextView.text = article.summary // ✅ INI HARUS "summary"
     }
 
-    override fun getItemCount(): Int = newsList.size
+    override fun getItemCount() = newsList.size
 }
