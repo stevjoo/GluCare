@@ -4,11 +4,15 @@ import android.Manifest
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -18,6 +22,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import com.example.mapmidtermproject.R
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlin.random.Random
 
@@ -186,43 +191,67 @@ class CameraActivity : AppCompatActivity() {
         )
     }
 
-    /** Popup hasil analisis dummy langsung di atas layar kamera (tanpa redirect) */
     private fun showAnalysisResultDialog() {
         val isDiabetic = Random.nextBoolean()
+
+        // 1. Inflate layout kustom
+        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_result, null)
+
+        // 2. Buat dialog builder
         val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        // 3. Buat dialog dan atur latar transparan
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false) // Mencegah dialog ditutup dengan tombol back
+
+        // 4. Ambil referensi UI
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
+        val btnNegative = dialogView.findViewById<MaterialButton>(R.id.btnDialogNegative)
 
         if (isDiabetic) {
-            builder.setTitle("Peringatan: Indikasi Ditemukan")
-                .setMessage(
-                    "Analisis gambar Anda menunjukkan beberapa ciri yang konsisten dengan luka diabetes (ulkus diabetik).\n\n" +
-                            "Segera pertimbangkan untuk konsultasi dengan tenaga medis profesional."
-                )
-                .setPositiveButton("Cek RS Terdekat") { _, _ ->
-                    startActivity(Intent(this, LocationActivity::class.java))
-                }
-                .setNeutralButton("Analisis Sekarang") { _, _ ->
-                    // kirim foto ke AnalysisActivity (kalau user mau lanjut)
-                    lastCapturedUri?.let {
-                        setResult(RESULT_OK, Intent().putExtra("captured_uri", it.toString()))
-                    }
-                    finish()
-                }
-                .setNegativeButton("Ambil Ulang") { d, _ -> d.dismiss() }
+            // --- KONDISI PERINGATAN ---
+            tvTitle.text = "Peringatan: Indikasi Ditemukan"
+            tvMessage.text = "Analisis gambar Anda menunjukkan beberapa ciri yang konsisten dengan luka diabetes (ulkus diabetik).\n\nSegera pertimbangkan untuk konsultasi dengan tenaga medis profesional."
+
+            btnPositive.text = "Cek RS Terdekat"
+            btnPositive.setOnClickListener {
+                startActivity(Intent(this, LocationActivity::class.java))
+                dialog.dismiss() // Tutup dialog setelah aksi
+            }
+
+            // Tombol kedua sekarang untuk "Ambil Ulang"
+            btnNegative.visibility = View.VISIBLE
+            btnNegative.text = "Ambil Ulang"
+            btnNegative.setOnClickListener {
+                dialog.dismiss()
+            }
+
         } else {
-            builder.setTitle("Hasil Analisis")
-                .setMessage(
-                    "Tidak ditemukan ciri khas luka diabetes pada foto Anda.\n\n" +
-                            "Catatan: Ini hanya simulasi, bukan pengganti nasihat medis."
-                )
-                .setPositiveButton("Analisis Sekarang") { _, _ ->
-                    lastCapturedUri?.let {
-                        setResult(RESULT_OK, Intent().putExtra("captured_uri", it.toString()))
-                    }
-                    finish()
+            // --- KONDISI NORMAL ---
+            tvTitle.text = "Hasil Analisis"
+            tvMessage.text = "Tidak ditemukan ciri khas luka diabetes pada foto Anda.\n\nPENTING: Aplikasi ini bukan pengganti nasihat medis."
+
+            // Aksi utama adalah lanjut ke halaman analisis
+            btnPositive.text = "Lanjut Analisis"
+            btnPositive.setOnClickListener {
+                lastCapturedUri?.let {
+                    setResult(RESULT_OK, Intent().putExtra("captured_uri", it.toString()))
                 }
-                .setNegativeButton("Ambil Ulang") { d, _ -> d.dismiss() }
+                finish()
+            }
+
+            // Tombol kedua untuk "Ambil Ulang"
+            btnNegative.visibility = View.VISIBLE
+            btnNegative.text = "Ambil Ulang"
+            btnNegative.setOnClickListener {
+                dialog.dismiss()
+            }
         }
 
-        builder.create().show()
+        dialog.show()
     }
 }

@@ -2,6 +2,8 @@ package com.example.mapmidtermproject.activities
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -27,7 +29,6 @@ class AnalysisActivity : AppCompatActivity() {
     private lateinit var btnStartAnalysis: MaterialButton
     private var currentImageUri: Uri? = null
 
-    // Launcher kamera custom
     private val cameraActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -36,7 +37,6 @@ class AnalysisActivity : AppCompatActivity() {
             }
         }
 
-    // Launcher galeri
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { onImageSelected(it) }
@@ -46,15 +46,12 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
-        // Bind views
-        val toolbar = findViewById<MaterialToolbar>(R.id.topAppBar)
         val ivLogo = findViewById<ImageView>(R.id.ivLogo)
         ivWoundImage = findViewById(R.id.ivWoundImage)
         tvPlaceholderText = findViewById(R.id.tvPlaceholderText)
         btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
 
-        // Logo klik → kembali ke dashboard
         ivLogo.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -63,15 +60,12 @@ class AnalysisActivity : AppCompatActivity() {
             finish()
         }
 
-        // Tombol analisis awalnya nonaktif
         setAnalysisButtonEnabled(false)
 
-        // Event pilih gambar
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
         ivWoundImage.setOnClickListener { showImageSourceDialog() }
         tvPlaceholderText.setOnClickListener { showImageSourceDialog() }
 
-        // Mulai analisis
         btnStartAnalysis.setOnClickListener {
             if (currentImageUri != null) showResultDialog()
             else Toast.makeText(this, "Silakan pilih atau ambil gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
@@ -97,12 +91,10 @@ class AnalysisActivity : AppCompatActivity() {
     private fun setAnalysisButtonEnabled(enabled: Boolean) {
         btnStartAnalysis.isEnabled = enabled
         if (enabled) {
-            // Aktif
             btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.blue))
             btnStartAnalysis.setTextColor(ContextCompat.getColor(this, android.R.color.white))
             btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, android.R.color.white)
         } else {
-            // Nonaktif
             btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.gray_light))
             btnStartAnalysis.setTextColor(ContextCompat.getColor(this, R.color.gray_text_disabled))
             btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, R.color.gray_text_disabled)
@@ -110,16 +102,27 @@ class AnalysisActivity : AppCompatActivity() {
     }
 
     private fun showImageSourceDialog() {
-        val options = arrayOf("Buka Kamera", "Pilih dari Galeri")
-        AlertDialog.Builder(this)
-            .setTitle("Pilih Sumber Gambar")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> openInAppCamera()
-                    1 -> galleryLauncher.launch("image/*")
-                }
-            }
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_image_source, null)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val btnOpenCamera = dialogView.findViewById<MaterialButton>(R.id.btnOpenCamera)
+        val btnOpenGallery = dialogView.findViewById<MaterialButton>(R.id.btnOpenGallery)
+
+        btnOpenCamera.setOnClickListener {
+            openInAppCamera()
+            dialog.dismiss()
+        }
+
+        btnOpenGallery.setOnClickListener {
+            galleryLauncher.launch("image/*")
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun openInAppCamera() {
@@ -129,27 +132,41 @@ class AnalysisActivity : AppCompatActivity() {
 
     private fun showResultDialog() {
         val isDiabetic = Random.nextBoolean()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_result, null)
         val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
+        val btnNegative = dialogView.findViewById<MaterialButton>(R.id.btnDialogNegative)
 
         if (isDiabetic) {
-            builder.setTitle("Peringatan: Indikasi Ditemukan")
-            builder.setMessage(
-                "Analisis gambar Anda menunjukkan adanya beberapa ciri yang konsisten dengan luka diabetes (ulkus diabetik).\n\n" +
-                        "Kami sangat menyarankan Anda untuk segera berkonsultasi dengan tenaga medis profesional untuk mendapatkan diagnosis dan penanganan yang tepat."
-            )
-            builder.setPositiveButton("Cari Rumah Sakit Terdekat") { _, _ ->
+            tvTitle.text = "Peringatan: Indikasi Ditemukan"
+            tvMessage.text = "Analisis gambar Anda menunjukkan adanya beberapa ciri yang konsisten dengan luka diabetes (ulkus diabetik).\n\nKami sangat menyarankan Anda untuk segera berkonsultasi dengan tenaga medis profesional untuk mendapatkan diagnosis dan penanganan yang tepat."
+            btnPositive.text = "Cari Rumah Sakit Terdekat"
+            btnPositive.setOnClickListener {
                 startActivity(Intent(this, LocationActivity::class.java))
+                dialog.dismiss()
             }
-            builder.setNegativeButton("Kembali") { d, _ -> d.dismiss() }
+            btnNegative.visibility = View.VISIBLE
+            btnNegative.text = "Kembali"
+            btnNegative.setOnClickListener {
+                dialog.dismiss()
+            }
         } else {
-            builder.setTitle("Hasil Analisis")
-            builder.setMessage(
-                "Berdasarkan analisis gambar, tidak ditemukan ciri-ciri khas luka diabetes pada foto Anda.\n\n" +
-                        "Catatan: Aplikasi ini bukan pengganti saran medis profesional."
-            )
-            builder.setPositiveButton("Oke, Mengerti") { d, _ -> d.dismiss() }
+            tvTitle.text = "Hasil Analisis"
+            tvMessage.text = "Berdasarkan analisis gambar, tidak ditemukan ciri-ciri yang khas dari luka diabetes (ulkus diabetik) pada luka Anda.\n\nPENTING: Aplikasi ini bukan pengganti nasihat medis. Jika Anda ragu atau luka tidak kunjung membaik, segera konsultasikan dengan dokter."
+            btnPositive.text = "Oke, Mengerti"
+            btnPositive.setOnClickListener {
+                dialog.dismiss()
+            }
+            btnNegative.visibility = View.GONE
         }
 
-        builder.create().show()
+        dialog.show()
     }
 }
