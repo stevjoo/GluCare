@@ -2,10 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- 🟢 Permissions -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Tambahan untuk Android <29 -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -25,8 +30,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MAPMidTermProject">
 
+        <!-- 🏁 Entry point -->
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.MAPMidTermProject.Splash">
             <intent-filter>
@@ -35,17 +41,24 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.LoginActivity" android:exported="false" />
-        <activity android:name=".activities.AnalysisActivity" android:exported="false" />
-        <activity android:name=".activities.LocationActivity" android:exported="false" />
-        <activity android:name=".settings.SettingsActivity" android:exported="false" />
-        <activity android:name=".settings.AccountSettingsActivity" android:exported="false" />
-        <activity android:name=".settings.ChangeUsernameActivity" android:exported="false" />
-        <activity android:name=".settings.ChangePhoneActivity" android:exported="false" />
-        <activity android:name=".settings.FAQActivity" android:exported="false" />
-        <activity android:name=".settings.PrivacyPolicyActivity" android:exported="false" />
-        <activity android:name=".activities.NewsDetailActivity" android:exported="false" />
-        <activity android:name=".activities.AllNewsActivity" android:exported="false" />
+        <!-- 🔹 Activities lainnya -->
+        <activity
+            android:name=".activities.NewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AnalysisActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.LocationActivity"
+            android:exported="false" />
+
+        <!-- 🔸 CameraActivity untuk fitur Analisis Foto Luka -->
+        <activity
+            android:name=".activities.CameraActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- 📁 File Provider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -55,5 +68,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
     </application>
+
 </manifest>

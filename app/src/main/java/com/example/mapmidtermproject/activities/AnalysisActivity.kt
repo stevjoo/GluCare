@@ -1,117 +1,172 @@
 package com.example.mapmidtermproject.activities
 
+import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
+import androidx.core.content.ContextCompat
+import com.example.mapmidtermproject.MainActivity
 import com.example.mapmidtermproject.R
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.button.MaterialButton
 import kotlin.random.Random
 
 class AnalysisActivity : AppCompatActivity() {
 
     private lateinit var ivWoundImage: ImageView
-    private lateinit var btnStartAnalysis: Button
+    private lateinit var tvPlaceholderText: TextView
+    private lateinit var btnSelectImage: MaterialButton
+    private lateinit var btnStartAnalysis: MaterialButton
     private var currentImageUri: Uri? = null
-    private var tempImageUri: Uri? = null
 
-    private val cameraLauncher = registerForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { isSuccess ->
-        if (isSuccess) {
-            currentImageUri = tempImageUri
-            ivWoundImage.setImageURI(currentImageUri)
-            btnStartAnalysis.isEnabled = true
+    private val cameraActivityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uriStr = result.data?.getStringExtra("captured_uri")
+                if (!uriStr.isNullOrEmpty()) onImageSelected(Uri.parse(uriStr))
+            }
         }
-    }
 
-    private val galleryLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            currentImageUri = it
-            ivWoundImage.setImageURI(it)
-            btnStartAnalysis.isEnabled = true
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { onImageSelected(it) }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
+        val ivLogo = findViewById<ImageView>(R.id.ivLogo)
         ivWoundImage = findViewById(R.id.ivWoundImage)
-        val btnSelectImage: Button = findViewById(R.id.btnSelectImage)
+        tvPlaceholderText = findViewById(R.id.tvPlaceholderText)
+        btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
 
-        btnSelectImage.setOnClickListener {
-            showImageSourceDialog()
+        ivLogo.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            startActivity(intent)
+            finish()
         }
+
+        setAnalysisButtonEnabled(false)
+
+        btnSelectImage.setOnClickListener { showImageSourceDialog() }
+        ivWoundImage.setOnClickListener { showImageSourceDialog() }
+        tvPlaceholderText.setOnClickListener { showImageSourceDialog() }
 
         btnStartAnalysis.setOnClickListener {
-            if (currentImageUri != null) {
-                showResultDialog()
-            } else {
-                Toast.makeText(this, "Silakan pilih gambar terlebih dahulu", Toast.LENGTH_SHORT).show()
-            }
+            if (currentImageUri != null) showResultDialog()
+            else Toast.makeText(this, "Silakan pilih atau ambil gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun createTempUri(): Uri {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val imageFile = File.createTempFile(
-            "JPEG_${timeStamp}_",
-            ".jpg",
-            applicationContext.cacheDir
-        )
-        tempImageUri = FileProvider.getUriForFile(applicationContext, "${applicationContext.packageName}.provider", imageFile)
-        return tempImageUri as Uri
+    private fun onImageSelected(uri: Uri) {
+        currentImageUri = uri
+        ivWoundImage.apply {
+            setImageURI(uri)
+            layoutParams = layoutParams.apply {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+            }
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            background = null
+            imageTintList = null
+        }
+        tvPlaceholderText.visibility = View.GONE
+        setAnalysisButtonEnabled(true)
     }
 
+    private fun setAnalysisButtonEnabled(enabled: Boolean) {
+        btnStartAnalysis.isEnabled = enabled
+        if (enabled) {
+            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.blue))
+            btnStartAnalysis.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, android.R.color.white)
+        } else {
+            btnStartAnalysis.setBackgroundColor(ContextCompat.getColor(this, R.color.gray_light))
+            btnStartAnalysis.setTextColor(ContextCompat.getColor(this, R.color.gray_text_disabled))
+            btnStartAnalysis.iconTint = ContextCompat.getColorStateList(this, R.color.gray_text_disabled)
+        }
+    }
 
     private fun showImageSourceDialog() {
-        val options = arrayOf("Buka Kamera", "Pilih dari Galeri")
-        AlertDialog.Builder(this)
-            .setTitle("Pilih Sumber Gambar")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> cameraLauncher.launch(createTempUri())
-                    1 -> galleryLauncher.launch("image/*")
-                }
-            }
-            .show()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_image_source, null)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val btnOpenCamera = dialogView.findViewById<MaterialButton>(R.id.btnOpenCamera)
+        val btnOpenGallery = dialogView.findViewById<MaterialButton>(R.id.btnOpenGallery)
+
+        btnOpenCamera.setOnClickListener {
+            openInAppCamera()
+            dialog.dismiss()
+        }
+
+        btnOpenGallery.setOnClickListener {
+            galleryLauncher.launch("image/*")
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun openInAppCamera() {
+        val intent = Intent(this, CameraActivity::class.java)
+        cameraActivityLauncher.launch(intent)
     }
 
     private fun showResultDialog() {
         val isDiabetic = Random.nextBoolean()
-
+        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_result, null)
         val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
+        val btnNegative = dialogView.findViewById<MaterialButton>(R.id.btnDialogNegative)
+
         if (isDiabetic) {
-            builder.setTitle("Hasil Analisis: Risiko Terdeteksi")
-            builder.setMessage("Berdasarkan analisis, luka Anda memiliki kemungkinan ciri-ciri luka diabetes. Segera konsultasikan dengan dokter.")
-            // DIUBAH: Tombol ini sekarang membuka LocationActivity
-            builder.setPositiveButton("Cek Lokasi Terdekat") { _, _ ->
+            tvTitle.text = "Peringatan: Indikasi Ditemukan"
+            tvMessage.text = "Analisis gambar Anda menunjukkan adanya beberapa ciri yang konsisten dengan luka diabetes (ulkus diabetik).\n\nKami sangat menyarankan Anda untuk segera berkonsultasi dengan tenaga medis profesional untuk mendapatkan diagnosis dan penanganan yang tepat."
+            btnPositive.text = "Cari Rumah Sakit Terdekat"
+            btnPositive.setOnClickListener {
                 startActivity(Intent(this, LocationActivity::class.java))
+                dialog.dismiss()
             }
-            builder.setNegativeButton("Tutup") { dialog, _ ->
+            btnNegative.visibility = View.VISIBLE
+            btnNegative.text = "Kembali"
+            btnNegative.setOnClickListener {
                 dialog.dismiss()
             }
         } else {
-            builder.setTitle("Hasil Analisis: Anda Sehat")
-            builder.setMessage("Luka Anda tidak menunjukkan ciri-ciri luka diabetes. Tetap jaga kebersihan dan kesehatan.")
-            builder.setPositiveButton("OK") { dialog, _ ->
+            tvTitle.text = "Hasil Analisis"
+            tvMessage.text = "Berdasarkan analisis gambar, tidak ditemukan ciri-ciri yang khas dari luka diabetes (ulkus diabetik) pada luka Anda.\n\nPENTING: Aplikasi ini bukan pengganti nasihat medis. Jika Anda ragu atau luka tidak kunjung membaik, segera konsultasikan dengan dokter."
+            btnPositive.text = "Oke, Mengerti"
+            btnPositive.setOnClickListener {
                 dialog.dismiss()
             }
+            btnNegative.visibility = View.GONE
         }
-        val dialog = builder.create()
+
         dialog.show()
     }
 }
