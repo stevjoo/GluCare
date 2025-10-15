@@ -40,6 +40,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="5dp"
         android:gravity="center"
         android:text="Masuk dengan akun Google Anda untuk melanjutkan."
         android:textColor="@color/black"

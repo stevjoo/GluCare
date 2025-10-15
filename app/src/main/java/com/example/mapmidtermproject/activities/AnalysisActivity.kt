@@ -15,9 +15,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.mapmidtermproject.MainActivity
+import com.example.mapmidtermproject.activities.MainActivity
 import com.example.mapmidtermproject.R
+import com.example.mapmidtermproject.settings.SettingsActivity
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import kotlin.random.Random
 
@@ -46,19 +48,19 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
-        val ivLogo = findViewById<ImageView>(R.id.ivLogo)
+//        val ivLogo = findViewById<ImageView>(R.id.ivLogo)
         ivWoundImage = findViewById(R.id.ivWoundImage)
         tvPlaceholderText = findViewById(R.id.tvPlaceholderText)
         btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
 
-        ivLogo.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            }
-            startActivity(intent)
-            finish()
-        }
+//        ivLogo.setOnClickListener {
+//            val intent = Intent(this, MainActivity::class.java).apply {
+//                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+//            }
+//            startActivity(intent)
+//            finish()
+//        }
 
         setAnalysisButtonEnabled(false)
 
@@ -69,6 +71,28 @@ class AnalysisActivity : AppCompatActivity() {
         btnStartAnalysis.setOnClickListener {
             if (currentImageUri != null) showResultDialog()
             else Toast.makeText(this, "Silakan pilih atau ambil gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
+        }
+
+        setupBottomNavigation()
+    }
+
+    private fun setupBottomNavigation() {
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNav.selectedItemId = R.id.nav_camera
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    true
+                }
+                R.id.nav_camera -> true
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
         }
     }
 
