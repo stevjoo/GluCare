@@ -10,7 +10,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.adapters.CarouselAdapter
 import com.example.mapmidtermproject.adapters.NewsAdapter
-import com.example.mapmidtermproject.data.DummyNewsData
+import com.example.mapmidtermproject.data.NewsData
 import com.example.mapmidtermproject.settings.SettingsActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -44,9 +44,9 @@ class MainActivity : AppCompatActivity() {
         // Carousel setup
         carouselViewPager = findViewById(R.id.carouselViewPager)
         val carouselImages = listOf(
-            R.drawable.sample_banner,
-            R.drawable.glucaremobileapplogo,
-            R.drawable.sample_image
+            R.drawable.food_label_reading,
+            R.drawable.diabetes_symptoms,
+            R.drawable.glucarename
         )
         carouselViewPager.adapter = CarouselAdapter(carouselImages)
 
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         rvNews.layoutManager = LinearLayoutManager(this)
 
         // Ambil data dari file terpisah
-        val newsList = DummyNewsData.getNewsList()
+        val newsList = NewsData.getNewsList()
 
         val adapter = NewsAdapter(newsList) { article ->
             val intent = Intent(this, NewsDetailActivity::class.java)

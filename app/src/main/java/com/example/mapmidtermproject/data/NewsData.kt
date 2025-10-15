@@ -80,7 +80,7 @@ object NewsData {
                 title = "Aplikasi Digital untuk Bantu Kelola Diabetes",
                 summary = "Catat asupan makanan, olahraga, dan kadar gula darah dalam satu genggaman.",
                 date = "15 September 2025",
-                imageResId = R.drawable.sample_banner,
+                imageResId = R.drawable.healthy_diabetic_meal,
                 content = "Teknologi kini memudahkan pengelolaan diabetes. Aplikasi seperti Glucare memungkinkan pengguna mencatat kadar gula darah, makanan, aktivitas fisik, dan obat harian. Beberapa aplikasi bahkan bisa menghasilkan laporan mingguan untuk dibawa ke dokter. Ini membantu pasien dan tenaga medis membuat keputusan lebih akurat."
             ),
             NewsArticle(
