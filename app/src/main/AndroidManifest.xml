@@ -35,10 +35,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".activities.NewsActivity"
-            android:exported="false" />
-
         <activity android:name=".activities.LoginActivity" android:exported="false" />
         <activity android:name=".activities.AnalysisActivity" android:exported="false" />
         <activity android:name=".activities.LocationActivity" android:exported="false" />
@@ -48,7 +44,8 @@
         <activity android:name=".settings.ChangePhoneActivity" android:exported="false" />
         <activity android:name=".settings.FAQActivity" android:exported="false" />
         <activity android:name=".settings.PrivacyPolicyActivity" android:exported="false" />
-
+        <activity android:name=".activities.NewsDetailActivity" android:exported="false" />
+        <activity android:name=".activities.AllNewsActivity" android:exported="false" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

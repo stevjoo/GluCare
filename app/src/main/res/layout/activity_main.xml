@@ -39,6 +39,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvViewAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="View All"
@@ -58,11 +59,11 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
+        style="@style/Widget.App.BottomNavigationView.NoRipple"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/white_primary"
-        style="@style/Widget.App.BottomNavigationView.NoRipple"
         app:elevation="8dp"
         app:itemIconTint="@color/blue"
         app:itemTextColor="@color/blue"
