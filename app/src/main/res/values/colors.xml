@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="white_primary">#ebfffb</color>
-    <color name="blue">#03989e</color>
-    <color name="gray">#a6a6a6</color>
+
+    <!-- GluCare palette -->
+    <color name="white_primary">#EBFFFB</color>   <!-- page background -->
+    <color name="blue">#03989E</color>           <!-- brand teal / primary -->
+    <color name="blue_light">#04B0B7</color>     <!-- lighter teal for emphasis/active alt -->
+
+    <!-- Neutrals -->
+    <color name="gray">#A6A6A6</color>
+    <color name="gray_light">#D9D9D9</color>     <!-- disabled bg -->
+    <color name="gray_text_disabled">#7F7F7F</color>
+
+    <!-- Semantic buttons (recommended) -->
+    <color name="primary_active">#4ACFD0</color>   <!-- active action button -->
+    <color name="primary_disabled">@color/gray_light</color>
+
+    <!-- Compatibility aliases (legacy refs) -->
+    <color name="gc_teal">@color/blue</color>
+    <color name="gc_disabled_text">@color/gray_text_disabled</color>
+    <color name="gc_grey">@color/gray_light</color>
 </resources>
