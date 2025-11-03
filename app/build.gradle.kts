@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.splashscreen)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Firebase
     implementation(platform(libs.firebase.bom))
