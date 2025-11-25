@@ -8,9 +8,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.activities.AnalysisActivity
+import com.example.mapmidtermproject.activities.LogActivity
 import com.example.mapmidtermproject.activities.LoginActivity
 import com.example.mapmidtermproject.activities.MainActivity
-import com.example.mapmidtermproject.utils.PreferenceHelper
+import com.example.mapmidtermproject.utils.FirestoreHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -30,74 +31,65 @@ class SettingsActivity : AppCompatActivity() {
 
         auth = Firebase.auth
 
-        // Inisialisasi Views
         tvUsername = findViewById(R.id.tvUsername)
         tvPhone = findViewById(R.id.tvPhone)
+
         val btnAccount = findViewById<LinearLayout>(R.id.btnAccount)
         val btnFAQ = findViewById<LinearLayout>(R.id.btnFAQ)
         val btnPrivacyPolicy = findViewById<LinearLayout>(R.id.btnPrivacyPolicy)
         val btnLogout = findViewById<Button>(R.id.btnLogout)
 
-        // Muat data dari preferensi
-        val pref = PreferenceHelper(this)
-        tvUsername.text = pref.getUsername()
-        tvPhone.text = pref.getPhone()
+        btnAccount.setOnClickListener { startActivity(Intent(this, AccountSettingsActivity::class.java)) }
+        btnFAQ.setOnClickListener { startActivity(Intent(this, FAQActivity::class.java)) }
+        btnPrivacyPolicy.setOnClickListener { startActivity(Intent(this, PrivacyPolicyActivity::class.java)) }
+        btnLogout.setOnClickListener { signOut() }
 
-        // Setup Listener Tombol
-        btnAccount.setOnClickListener {
-            startActivity(Intent(this, AccountSettingsActivity::class.java))
-        }
-
-        btnFAQ.setOnClickListener {
-            startActivity(Intent(this, FAQActivity::class.java))
-        }
-
-        btnPrivacyPolicy.setOnClickListener {
-            startActivity(Intent(this, PrivacyPolicyActivity::class.java))
-        }
-
-        btnLogout.setOnClickListener {
-            signOut()
-        }
-
-        // Setup untuk Bottom Navigation
         setupBottomNavigation()
     }
 
     override fun onResume() {
         super.onResume()
-        // Muat ulang data jika ada perubahan saat kembali ke halaman ini
-        val pref = PreferenceHelper(this)
-        tvUsername.text = pref.getUsername()
-        tvPhone.text = pref.getPhone()
+        loadUserData()
+    }
+
+    private fun loadUserData() {
+        val currentUser = auth.currentUser
+        val googleName = currentUser?.displayName ?: "Pengguna GluCare"
+
+        // 1. Tampilkan nama Google dulu sebagai placeholder (agar tidak kosong/loading lama)
+        tvUsername.text = googleName
+        tvPhone.text = "Memuat..."
+
+        // 2. Cek Database untuk data custom
+        FirestoreHelper.getUserProfile { profile ->
+            if (profile != null) {
+                // Jika user pernah edit nama, pakai nama dari DB. Jika tidak, tetap pakai Google Name
+                if (!profile.username.isNullOrEmpty()) {
+                    tvUsername.text = profile.username
+                } else {
+                    tvUsername.text = googleName
+                }
+
+                // Telepon
+                tvPhone.text = profile.phone ?: "Belum diatur"
+            } else {
+                // User baru (belum ada data di DB), biarkan nama Google
+                tvUsername.text = googleName
+                tvPhone.text = "Belum diatur"
+            }
+        }
     }
 
     private fun setupBottomNavigation() {
+        // ... (KODE SAMA SEPERTI SEBELUMNYA) ...
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_settings // Tandai "Settings" sebagai aktif
-
+        bottomNav.selectedItemId = R.id.nav_settings
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // Pindah ke MainActivity tanpa membuat instance baru
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    startActivity(intent)
-                    overridePendingTransition(0, 0) // Hilangkan animasi transisi
-                    true
-                }
-                R.id.nav_camera -> {
-                    // Pindah ke AnalysisActivity
-                    val intent = Intent(this, AnalysisActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    startActivity(intent)
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                R.id.nav_settings -> {
-                    // Sudah di halaman ini, tidak perlu lakukan apa-apa
-                    true
-                }
+                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); overridePendingTransition(0, 0); true }
+                R.id.nav_log -> { startActivity(Intent(this, LogActivity::class.java)); overridePendingTransition(0, 0); true }
+                R.id.nav_camera -> { startActivity(Intent(this, AnalysisActivity::class.java)); overridePendingTransition(0, 0); true }
+                R.id.nav_settings -> true
                 else -> false
             }
         }

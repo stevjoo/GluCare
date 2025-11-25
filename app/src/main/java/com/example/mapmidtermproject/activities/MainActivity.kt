@@ -26,16 +26,18 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        // Auth Init
         auth = Firebase.auth
+
+        // Cek Login di awal
         if (auth.currentUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            goToLogin()
             return
         }
 
         setContentView(R.layout.activity_main)
 
-        // Setup "View All" click listener
+        // Setup View All
         val tvViewAll: TextView = findViewById(R.id.tvViewAll)
         tvViewAll.setOnClickListener {
             startActivity(Intent(this, AllNewsActivity::class.java))
@@ -50,13 +52,10 @@ class MainActivity : AppCompatActivity() {
         )
         carouselViewPager.adapter = CarouselAdapter(carouselImages)
 
-        // RecyclerView setup with click listener
+        // RecyclerView setup
         val rvNews = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNews)
         rvNews.layoutManager = LinearLayoutManager(this)
-
-        // Ambil data dari file terpisah
         val newsList = NewsData.getNewsList()
-
         val adapter = NewsAdapter(newsList) { article ->
             val intent = Intent(this, NewsDetailActivity::class.java)
             intent.putExtra("EXTRA_ARTICLE", article)
@@ -64,8 +63,24 @@ class MainActivity : AppCompatActivity() {
         }
         rvNews.adapter = adapter
 
-        // Bottom Nav setup
         setupBottomNavigation()
+    }
+
+    // --- FITUR KEAMANAN (AUTH GUARD) ---
+    override fun onStart() {
+        super.onStart()
+        // Cek setiap kali user masuk ke halaman ini
+        // Jika user null (misal baru saja dihapus), langsung tendang
+        if (auth.currentUser == null) {
+            goToLogin()
+        }
+    }
+
+    private fun goToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun setupBottomNavigation() {
@@ -75,12 +90,19 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> true
+                R.id.nav_log -> {
+                    startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
+                    true
+                }
                 R.id.nav_camera -> {
-                    startActivity(Intent(this, AnalysisActivity::class.java))
+                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
                     true
                 }
                 R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
+                    startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
                     true
                 }
                 else -> false

@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.example.mapmidtermproject.activities.MainActivity
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.settings.SettingsActivity
+import com.example.mapmidtermproject.utils.FirestoreHelper
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
@@ -167,6 +168,10 @@ class AnalysisActivity : AppCompatActivity() {
         val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
         val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
         val btnNegative = dialogView.findViewById<MaterialButton>(R.id.btnDialogNegative)
+
+        currentImageUri?.let { uri ->
+            FirestoreHelper.saveWoundLog(uri.toString(), isDiabetic)
+        }
 
         if (isDiabetic) {
             tvTitle.text = "Peringatan: Indikasi Ditemukan"

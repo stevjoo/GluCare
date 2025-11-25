@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.MAPMidTermProject" parent="Base.Theme.MAPMidTermProject" />
+    <style name="Theme.MAPMidTermProject" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
 
     <style name="Theme.MAPMidTermProject.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white_primary</item>
@@ -14,4 +14,4 @@
         <item name="itemRippleColor">@color/transparent_selector</item>
     </style>
 
-</resources>
+    </resources>

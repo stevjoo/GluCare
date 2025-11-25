@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapmidtermproject.R
-import com.example.mapmidtermproject.utils.PreferenceHelper
+import com.example.mapmidtermproject.utils.FirestoreHelper
 
 class ChangePhoneActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,23 +16,21 @@ class ChangePhoneActivity : AppCompatActivity() {
 
         val etNewPhone = findViewById<EditText>(R.id.etNewPhone)
         val btnSave = findViewById<Button>(R.id.btnSavePhone)
+        val btnBack = findViewById<ImageView>(R.id.btnBack)
 
-        val pref = PreferenceHelper(this) // ✅ DITAMBAHKAN
+        btnBack.setOnClickListener { finish() }
 
         btnSave.setOnClickListener {
             val phone = etNewPhone.text.toString().trim()
             if (phone.isEmpty()) {
                 Toast.makeText(this, "Nomor telepon tidak boleh kosong", Toast.LENGTH_SHORT).show()
             } else {
-                pref.savePhone(phone)
-                Toast.makeText(this, "Nomor telepon berhasil diperbarui", Toast.LENGTH_SHORT).show()
-                finish()
+                // UPDATE KE FIRESTORE
+                FirestoreHelper.updateUserProfile(username = null, phone = phone) {
+                    Toast.makeText(this, "Nomor telepon berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
-        }
-
-        val btnBack = findViewById<ImageView>(R.id.btnBack)
-        btnBack.setOnClickListener {
-            finish()
         }
     }
 }
