@@ -22,14 +22,6 @@
           }
         },
         {
-          "client_id": "672379213921-pfih9gj2v4uvhklmvqtifkqg7luaaufc.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.mapmidtermproject",
-            "certificate_hash": "6dff1864077a74fabb633aa976cce1c0210d0c2e"
-          }
-        },
-        {
           "client_id": "672379213921-psdg2k78jokdit8fqcdt7cgvkr0ngk46.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
