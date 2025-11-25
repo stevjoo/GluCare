@@ -13,5 +13,4 @@
     <style name="Widget.App.BottomNavigationView.NoRipple" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemRippleColor">@color/transparent_selector</item>
     </style>
-
-    </resources>
+</resources>

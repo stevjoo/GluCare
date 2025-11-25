@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapmidtermproject.R
+import com.example.mapmidtermproject.utils.UserRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -32,17 +33,14 @@ class LoginActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
-                // Google Sign In berhasil, sekarang autentikasi dengan Firebase
                 val account = task.getResult(ApiException::class.java)!!
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
-                // Google Sign In gagal
                 Log.w(TAG, "Google sign in failed", e)
                 Toast.makeText(this, "Google Sign-In Gagal", Toast.LENGTH_SHORT).show()
-                updateUI(true) // Kembalikan UI seperti semula
+                updateUI(true)
             }
         } else {
-            // Pengguna membatalkan proses login
             updateUI(true)
         }
     }
@@ -55,20 +53,16 @@ class LoginActivity : AppCompatActivity() {
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
         progressBar = findViewById(R.id.progressBar)
 
-        // Konfigurasi Google Sign In untuk mendapatkan ID Token
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        btnGoogleSignIn.setOnClickListener {
-            signIn()
-        }
+        btnGoogleSignIn.setOnClickListener { signIn() }
     }
 
     private fun signIn() {
-        // Tampilkan loading saat proses dimulai
         updateUI(false)
         val signInIntent = googleSignInClient.signInIntent
         googleSignInLauncher.launch(signInIntent)
@@ -79,22 +73,21 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    val u = auth.currentUser!!
+                    UserRepository.upsertUser(u)
                     Toast.makeText(this, "Login Berhasil!", Toast.LENGTH_SHORT).show()
-                    // Buka MainActivity dan bersihkan back stack
                     val intent = Intent(this, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
-                    finish() // Tutup LoginActivity
+                    finish()
                 } else {
-                    // Autentikasi Firebase gagal
                     Log.w(TAG, "signInWithCredential;failure", task.exception)
                     Toast.makeText(this, "Autentikasi Firebase Gagal", Toast.LENGTH_SHORT).show()
-                    updateUI(true) // Kembalikan UI jika gagal
+                    updateUI(true)
                 }
             }
     }
 
-    // Fungsi untuk mengelola tampilan UI (menampilkan/menyembunyikan loading)
     private fun updateUI(isLoginEnabled: Boolean) {
         if (isLoginEnabled) {
             progressBar.visibility = View.GONE
