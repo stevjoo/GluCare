@@ -1,20 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.MAPMidTermProject" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
 
-    <!-- Base theme: turunan AppCompat/MaterialComponents -->
-    <style name="Base.Theme.MAPMidTermProject" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Warna dasar (sinkron dengan colors.xml kamu) -->
-        <item name="colorPrimary">@color/blue</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-
-        <!-- Sistem bars -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/white_primary</item>
-    </style>
-
-    <!-- Theme app meng-extend base -->
-    <style name="Theme.MAPMidTermProject" parent="Base.Theme.MAPMidTermProject" />
-
-    <!-- Splash Theme -->
     <style name="Theme.MAPMidTermProject.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white_primary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/glucaremobileapplogo</item>
@@ -24,11 +10,7 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
-    <!-- BottomNavigation tanpa ripple -->
     <style name="Widget.App.BottomNavigationView.NoRipple" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemRippleColor">@color/transparent_selector</item>
-        <item name="itemHorizontalTranslationEnabled">false</item>
-        <item name="labelVisibilityMode">labeled</item>
     </style>
-
 </resources>

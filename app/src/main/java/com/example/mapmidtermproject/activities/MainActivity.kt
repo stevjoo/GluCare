@@ -2,8 +2,6 @@ package com.example.mapmidtermproject.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -24,37 +22,28 @@ class MainActivity : AppCompatActivity() {
     private lateinit var carouselViewPager: ViewPager2
     private lateinit var auth: FirebaseAuth
 
-    private var sliderIndex = 0
-    private val sliderHandler = Handler(Looper.getMainLooper())
-    private val sliderRunnable = object : Runnable {
-        override fun run() {
-            val count = carouselViewPager.adapter?.itemCount ?: 0
-            if (count > 0) {
-                sliderIndex = (carouselViewPager.currentItem + 1) % count
-                carouselViewPager.setCurrentItem(sliderIndex, true)
-            }
-            sliderHandler.postDelayed(this, 5000)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        // Auth Init
         auth = Firebase.auth
+
+        // Cek Login di awal
         if (auth.currentUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            goToLogin()
             return
         }
 
         setContentView(R.layout.activity_main)
 
+        // Setup View All
         val tvViewAll: TextView = findViewById(R.id.tvViewAll)
         tvViewAll.setOnClickListener {
             startActivity(Intent(this, AllNewsActivity::class.java))
         }
 
+        // Carousel setup
         carouselViewPager = findViewById(R.id.carouselViewPager)
         val carouselImages = listOf(
             R.drawable.food_label_reading,
@@ -62,12 +51,8 @@ class MainActivity : AppCompatActivity() {
             R.drawable.glucarename
         )
         carouselViewPager.adapter = CarouselAdapter(carouselImages)
-        carouselViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                sliderIndex = position
-            }
-        })
 
+        // RecyclerView setup
         val rvNews = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNews)
         rvNews.layoutManager = LinearLayoutManager(this)
         val newsList = NewsData.getNewsList()
@@ -81,28 +66,43 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
-    override fun onResume() {
-        super.onResume()
-        sliderHandler.postDelayed(sliderRunnable, 2000)
+    // --- FITUR KEAMANAN (AUTH GUARD) ---
+    override fun onStart() {
+        super.onStart()
+        // Cek setiap kali user masuk ke halaman ini
+        // Jika user null (misal baru saja dihapus), langsung tendang
+        if (auth.currentUser == null) {
+            goToLogin()
+        }
     }
 
-    override fun onPause() {
-        sliderHandler.removeCallbacks(sliderRunnable)
-        super.onPause()
+    private fun goToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNav.selectedItemId = R.id.nav_home
+
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> true
+                R.id.nav_log -> {
+                    startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
+                    true
+                }
                 R.id.nav_camera -> {
-                    startActivity(Intent(this, AnalysisActivity::class.java))
+                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
                     true
                 }
                 R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
+                    startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
                     true
                 }
                 else -> false

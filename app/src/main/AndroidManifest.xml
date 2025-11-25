@@ -47,6 +47,10 @@
             android:name=".activities.CameraActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.LogActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".settings.SettingsActivity" android:exported="false" />
         <activity android:name=".settings.AccountSettingsActivity" android:exported="false" />
