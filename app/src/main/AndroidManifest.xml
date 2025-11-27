@@ -43,14 +43,17 @@
         <activity android:name=".activities.AllNewsActivity" android:exported="false" />
         <activity android:name=".activities.AnalysisActivity" android:exported="false" />
         <activity android:name=".activities.LocationActivity" android:exported="false" />
+
+        <!-- Activity Jurnal (Log) -->
+        <activity android:name=".activities.LogActivity" android:exported="false" />
+
         <activity
             android:name=".activities.CameraActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.LogActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
+
+        <!-- ACTIVITY BARU: GALERI LOKAL (Tambahkan ini agar tidak crash) -->
+        <activity android:name=".activities.LocalGalleryActivity" android:exported="false" />
 
         <activity android:name=".settings.SettingsActivity" android:exported="false" />
         <activity android:name=".settings.AccountSettingsActivity" android:exported="false" />
@@ -58,7 +61,6 @@
         <activity android:name=".settings.ChangePhoneActivity" android:exported="false" />
         <activity android:name=".settings.FAQActivity" android:exported="false" />
         <activity android:name=".settings.PrivacyPolicyActivity" android:exported="false" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -5,13 +5,14 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.adapters.CarouselAdapter
 import com.example.mapmidtermproject.adapters.NewsAdapter
 import com.example.mapmidtermproject.settings.SettingsActivity
-import com.example.mapmidtermproject.utils.FirestoreHelper
+import com.example.mapmidtermproject.viewmodels.NewsViewModel // Import VM
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var carouselViewPager: ViewPager2
     private lateinit var auth: FirebaseAuth
     private lateinit var newsAdapter: NewsAdapter
+    private lateinit var viewModel: NewsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -35,14 +37,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_main)
+        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
 
-        // Setup View All
         val tvViewAll: TextView = findViewById(R.id.tvViewAll)
         tvViewAll.setOnClickListener {
             startActivity(Intent(this, AllNewsActivity::class.java))
         }
 
-        // Carousel setup
         carouselViewPager = findViewById(R.id.carouselViewPager)
         val carouselImages = listOf(
             R.drawable.food_label_reading,
@@ -51,11 +52,9 @@ class MainActivity : AppCompatActivity() {
         )
         carouselViewPager.adapter = CarouselAdapter(carouselImages)
 
-        // RecyclerView News setup
         val rvNews = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNews)
         rvNews.layoutManager = LinearLayoutManager(this)
 
-        // Adapter awal kosong
         newsAdapter = NewsAdapter(emptyList()) { article ->
             val intent = Intent(this, NewsDetailActivity::class.java)
             intent.putExtra("EXTRA_ARTICLE", article)
@@ -63,18 +62,15 @@ class MainActivity : AppCompatActivity() {
         }
         rvNews.adapter = newsAdapter
 
-        // --- LOAD BERITA ---
-        // Ini akan otomatis upload dummy jika kosong, lalu menampilkannya
-        loadNews()
+        // OBSERVASI DATA (MVVM)
+        viewModel.newsList.observe(this) { list ->
+            newsAdapter.updateData(list)
+        }
+
+        // Panggil Load
+        viewModel.loadNews()
 
         setupBottomNavigation()
-    }
-
-    private fun loadNews() {
-        FirestoreHelper.getNews { newsList ->
-            // Update UI saat data siap
-            newsAdapter.updateData(newsList)
-        }
     }
 
     override fun onStart() {
@@ -85,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ... (Setup Bottom Nav SAMA) ...
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNav.selectedItemId = R.id.nav_home

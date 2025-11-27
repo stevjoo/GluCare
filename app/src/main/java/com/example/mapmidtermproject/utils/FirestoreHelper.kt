@@ -19,7 +19,9 @@ data class UserProfile(
     val email: String? = null
 )
 
+// Menambahkan ID agar bisa dihapus
 data class FoodLog(
+    var id: String = "",
     val foodName: String = "",
     val bloodSugar: Int = 0,
     val timestamp: Date = Date()
@@ -37,7 +39,8 @@ object FirestoreHelper {
 
     // --- PROFIL USER ---
 
-    // PENTING: Panggil ini di LoginActivity/MainActivity agar data tidak hilang/tertimpa
+    // PENTING: Panggil ini di LoginActivity saat sukses login
+    // Mencegah data lama (No HP) tertimpa oleh data baru yang kosong
     fun initUserDataIfNew() {
         val user = auth.currentUser ?: return
         val uid = user.uid
@@ -45,20 +48,23 @@ object FirestoreHelper {
 
         docRef.get().addOnSuccessListener { document ->
             if (!document.exists()) {
-                // Hanya buat data baru jika belum ada
+                Log.d("Firestore", "User baru, inisialisasi data...")
                 val newData = hashMapOf(
                     "username" to (user.displayName ?: "Pengguna"),
                     "email" to (user.email ?: ""),
-                    "phone" to "" // Default kosong, jangan null
+                    "phone" to "" // Default string kosong agar tidak null
                 )
+                // Gunakan merge agar aman
                 docRef.set(newData, SetOptions.merge())
+            } else {
+                Log.d("Firestore", "User lama, skip inisialisasi (Data aman).")
             }
         }.addOnFailureListener { e ->
             Log.e("Firestore", "Gagal cek user init: $e")
         }
     }
 
-    // Update Username (Aman: Menggunakan Merge)
+    // Update Username (Aman: Tidak menghapus Phone)
     fun updateUsername(newUsername: String, onSuccess: () -> Unit) {
         val uid = auth.currentUser?.uid ?: return
         val data = hashMapOf<String, Any>("username" to newUsername)
@@ -70,10 +76,10 @@ object FirestoreHelper {
             .addOnFailureListener { Log.e("Firestore", "Gagal update username: $it") }
     }
 
-    // Update Phone (Aman: Menggunakan Merge)
+    // Update Phone (Aman: Tidak menghapus Username)
     fun updatePhone(newPhone: String, onSuccess: () -> Unit) {
         val uid = auth.currentUser?.uid ?: return
-        // Pastikan newPhone dikirim sebagai String yang valid
+        // Pastikan tidak null
         val validPhone = if (newPhone.isBlank()) "" else newPhone
 
         val data = hashMapOf<String, Any>("phone" to validPhone)
@@ -81,19 +87,14 @@ object FirestoreHelper {
 
         db.collection("users").document(uid)
             .set(data, SetOptions.merge())
-            .addOnSuccessListener {
-                Log.d("Firestore", "Sukses update phone ke: $validPhone")
-                onSuccess()
-            }
+            .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { Log.e("Firestore", "Gagal update phone: $it") }
     }
 
-    // Ambil Profil dengan Prioritas Server
+    // Ambil Profil (Realtime Listener)
     fun getUserProfile(onResult: (UserProfile?) -> Unit) {
         val uid = auth.currentUser?.uid ?: return
 
-        // Menggunakan addSnapshotListener agar update secara realtime (lebih cepat dan akurat)
-        // Ini mengatasi masalah data "telat" muncul
         db.collection("users").document(uid).addSnapshotListener { document, error ->
             if (error != null) {
                 Log.e("Firestore", "Error listen profile: $error")
@@ -112,24 +113,48 @@ object FirestoreHelper {
         }
     }
 
-    // --- FOOD LOG ---
+    // --- FOOD LOG (CRUD) ---
+
+    // 1. CREATE (Simpan Log)
     fun saveFoodLog(food: String, sugar: Int, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val uid = auth.currentUser?.uid ?: return
-        val log = FoodLog(food, sugar, Date())
+        // ID dikosongkan dulu, Firebase akan generate otomatis
+        val log = FoodLog(id = "", foodName = food, bloodSugar = sugar, timestamp = Date())
+
         db.collection("users").document(uid).collection("food_logs")
-            .add(log).addOnSuccessListener { onSuccess() }.addOnFailureListener { onFailure(it) }
+            .add(log)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
     }
 
+    // 2. READ (Ambil Data Realtime)
     fun listenToFoodLogs(onResult: (List<FoodLog>) -> Unit): ListenerRegistration? {
         val uid = auth.currentUser?.uid ?: return null
         return db.collection("users").document(uid).collection("food_logs")
             .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.ASCENDING)
-            .addSnapshotListener { v, e ->
-                if (e == null) onResult(v?.toObjects(FoodLog::class.java) ?: emptyList())
+            .addSnapshotListener { value, error ->
+                if (error != null) return@addSnapshotListener
+
+                val list = ArrayList<FoodLog>()
+                for (doc in value!!) {
+                    val log = doc.toObject(FoodLog::class.java)
+                    log.id = doc.id // PENTING: Simpan ID dokumen agar bisa dihapus
+                    list.add(log)
+                }
+                onResult(list)
             }
     }
 
-    // --- WOUND LOG ---
+    // 3. DELETE (Hapus Log Tertentu)
+    fun deleteFoodLog(logId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val uid = auth.currentUser?.uid ?: return
+        db.collection("users").document(uid).collection("food_logs").document(logId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onFailure(it) }
+    }
+
+    // --- WOUND LOG (Database Online - Opsional jika pakai lokal) ---
     fun saveWoundLog(imageUri: String, isDiabetic: Boolean) {
         val uid = auth.currentUser?.uid ?: return
         val log = WoundLog(imageUri, isDiabetic, Date())
@@ -157,52 +182,56 @@ object FirestoreHelper {
         batch.commit()
     }
 
-    // --- HAPUS AKUN (SOLUSI MASALAH 2) ---
+    // --- HAPUS AKUN (COMPLETE CLEANUP) ---
     fun deleteAccount(onSuccess: () -> Unit, onReauthRequired: () -> Unit, onFailure: (Exception) -> Unit) {
         val user = auth.currentUser
         val uid = user?.uid ?: return
 
-        // 1. Hapus Food Logs
+        // 1. Hapus Sub-koleksi Food Logs
         deleteSubCollection("users/$uid/food_logs") {
-            // 2. Hapus Wound Logs
+            // 2. Hapus Sub-koleksi Wound Logs
             deleteSubCollection("users/$uid/wound_logs") {
-                // 3. Hapus Dokumen User
+                // 3. Hapus Dokumen User Utama
                 db.collection("users").document(uid).delete().addOnCompleteListener {
-                    // 4. Hapus User Auth
+                    // 4. Hapus Akun Autentikasi (Login)
                     user.delete()
                         .addOnSuccessListener { onSuccess() }
                         .addOnFailureListener { e ->
-                            if (e is FirebaseAuthRecentLoginRequiredException) onReauthRequired() else onFailure(e)
+                            if (e is FirebaseAuthRecentLoginRequiredException) {
+                                onReauthRequired()
+                            } else {
+                                onFailure(e)
+                            }
                         }
                 }
             }
         }
     }
 
-    // Helper Hapus Subcollection yang lebih kuat
+    // Helper untuk menghapus koleksi (Batch Limit 500)
     private fun deleteSubCollection(path: String, onComplete: () -> Unit) {
         val collectionRef = db.collection(path)
-        collectionRef.get().addOnSuccessListener { snapshot ->
+
+        // Ambil 500 dokumen (batas batch)
+        collectionRef.limit(500).get().addOnSuccessListener { snapshot ->
             if (snapshot.isEmpty) {
-                onComplete()
+                onComplete() // Sudah bersih
                 return@addOnSuccessListener
             }
 
             val batch = db.batch()
-            // Loop semua dokumen
             for (doc in snapshot.documents) {
                 batch.delete(doc.reference)
             }
 
             batch.commit()
                 .addOnSuccessListener {
-                    // Cek lagi apakah masih ada sisa (karena limit batch 500)
-                    // Panggil rekursif jika masih ada
+                    // Panggil lagi (rekursif) jika masih ada sisa data
                     deleteSubCollection(path, onComplete)
                 }
                 .addOnFailureListener {
-                    Log.e("Firestore", "Gagal hapus batch: $it")
-                    onComplete() // Lanjut saja agar tidak stuck
+                    Log.e("Firestore", "Gagal hapus batch subcollection: $it")
+                    onComplete() // Tetap lanjut agar tidak stuck
                 }
         }.addOnFailureListener { onComplete() }
     }

@@ -9,6 +9,7 @@
     tools:context=".activities.AnalysisActivity"
     android:fitsSystemWindows="true">
 
+    <!-- 1. AppBar (Header) -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -22,40 +23,19 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="#EBFFFB">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp">
-
-<!--                <ImageView-->
-<!--                    android:id="@+id/ivLogo"-->
-<!--                    android:layout_width="40dp"-->
-<!--                    android:layout_height="40dp"-->
-<!--                    android:layout_alignParentStart="true"-->
-<!--                    android:layout_centerVertical="true"-->
-<!--                    android:background="?attr/selectableItemBackgroundBorderless"-->
-<!--                    android:clickable="true"-->
-<!--                    android:contentDescription="Logo GluCare"-->
-<!--                    android:focusable="true"-->
-<!--                    android:padding="8dp"-->
-<!--                    android:src="@drawable/glucareicon" />-->
-
-                <TextView
-                    android:id="@+id/tvTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:includeFontPadding="false"
-                    android:text="Analisis Foto Luka"
-                    android:textColor="@color/blue"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Analisis Foto Luka"
+                android:textColor="@color/blue"
+                android:textSize="20sp"
+                android:textStyle="bold" />
         </com.google.android.material.appbar.MaterialToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- 2. Bottom Navigation (Footer) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         style="@style/Widget.App.BottomNavigationView.NoRipple"
@@ -68,6 +48,8 @@
         app:itemTextColor="@color/blue"
         app:menu="@menu/bottom_nav_menu" />
 
+    <!-- 3. ScrollView (Konten Tengah) -->
+    <!-- PENTING: ScrollView cuma boleh punya 1 anak langsung (LinearLayout ini) -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -76,15 +58,17 @@
         android:fillViewport="true"
         android:padding="24dp">
 
-        <RelativeLayout
+        <!-- INI ANAK TUNGGAL SCROLLVIEW -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
+            <!-- Card Foto -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardWoundImage"
                 android:layout_width="match_parent"
                 android:layout_height="230dp"
-                android:layout_alignParentTop="true"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="#F4FEFC"
@@ -122,11 +106,11 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Tombol 1: Pilih Gambar -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSelectImage"
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
-                android:layout_below="@id/cardWoundImage"
                 android:text="Pilih Gambar / Ambil Foto"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
@@ -137,12 +121,12 @@
                 app:iconPadding="12dp"
                 app:iconTint="@android:color/white" />
 
+            <!-- Tombol 2: Mulai Analisis -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnStartAnalysis"
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
-                android:layout_below="@id/btnSelectImage"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="8dp"
                 android:enabled="false"
                 android:text="Mulai Analisis"
                 android:textColor="#7F7F7F"
@@ -154,10 +138,25 @@
                 app:iconPadding="12dp"
                 app:iconTint="#7F7F7F" />
 
+            <!-- Tombol 3: Lihat Galeri (FITUR BARU) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewGallery"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="8dp"
+                android:text="Lihat Galeri Luka Saya"
+                android:textColor="@color/blue"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/blue"
+                app:strokeWidth="1dp"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_placeholder_gallery"
+                app:iconPadding="12dp"
+                app:iconTint="@color/blue" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:layout_marginTop="18dp"
                 android:gravity="center"
                 android:lineSpacingExtra="3dp"
@@ -165,7 +164,7 @@
                 android:textColor="#5A6A6B"
                 android:textSize="12sp" />
 
-        </RelativeLayout>
+        </LinearLayout> <!-- Akhir Anak Tunggal ScrollView -->
     </ScrollView>
 
 </RelativeLayout>

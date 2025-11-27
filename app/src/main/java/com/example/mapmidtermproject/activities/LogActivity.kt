@@ -6,12 +6,17 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.mapmidtermproject.R
+import com.example.mapmidtermproject.adapters.FoodLogAdapter
 import com.example.mapmidtermproject.settings.SettingsActivity
 import com.example.mapmidtermproject.utils.CustomMarkerView
-import com.example.mapmidtermproject.utils.FirestoreHelper
 import com.example.mapmidtermproject.utils.FoodLog
+import com.example.mapmidtermproject.viewmodels.LogViewModel // MVVM IMPORT
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -22,27 +27,31 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.textfield.TextInputEditText
-import com.google.firebase.firestore.ListenerRegistration
 import java.text.SimpleDateFormat
 import java.util.*
 
 class LogActivity : AppCompatActivity() {
 
+    // ViewModel Definition
+    private lateinit var viewModel: LogViewModel
+
     private lateinit var etFoodName: TextInputEditText
     private lateinit var etSugarLevel: TextInputEditText
     private lateinit var lineChart: LineChart
     private lateinit var tvSelectedDate: TextView
+    private lateinit var adapter: FoodLogAdapter
 
     private var allLogs: List<FoodLog> = listOf()
     private var selectedDate: Calendar = Calendar.getInstance()
-    private var currentFilterType = "DAY" // Default: Hari Ini
-    private var dbListener: ListenerRegistration? = null
+    private var currentFilterType = "DAY"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log)
 
-        // Binding Views
+        // 1. Inisialisasi ViewModel
+        viewModel = ViewModelProvider(this)[LogViewModel::class.java]
+
         etFoodName = findViewById(R.id.etFoodName)
         etSugarLevel = findViewById(R.id.etSugarLevel)
         lineChart = findViewById(R.id.lineChart)
@@ -51,11 +60,26 @@ class LogActivity : AppCompatActivity() {
         val btnSave = findViewById<MaterialButton>(R.id.btnSaveLog)
         val btnPickDate = findViewById<MaterialButton>(R.id.btnPickDate)
         val toggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.toggleGroup)
+        val rvLogs = findViewById<RecyclerView>(R.id.rvFoodLogs)
+
+        // 2. Setup RecyclerView (Adapter)
+        rvLogs.layoutManager = LinearLayoutManager(this)
+        adapter = FoodLogAdapter { log ->
+            showDeleteDialog(log)
+        }
+        rvLogs.adapter = adapter
+
+        // 3. Observasi Data dari ViewModel (Live Update)
+        viewModel.logs.observe(this) { logs ->
+            allLogs = logs
+            applyFilter() // Update Grafik
+            adapter.submitList(logs) // Update List
+        }
 
         setupChart()
         updateDateLabel()
 
-        // 1. Logic Simpan Data
+        // 4. Logic Tombol Simpan (Panggil ViewModel)
         btnSave.setOnClickListener {
             val food = etFoodName.text.toString()
             val sugarStr = etSugarLevel.text.toString()
@@ -63,30 +87,31 @@ class LogActivity : AppCompatActivity() {
             if (food.isNotEmpty() && sugarStr.isNotEmpty()) {
                 val sugar = sugarStr.toIntOrNull()
                 if (sugar != null) {
-                    FirestoreHelper.saveFoodLog(food, sugar, {
-                        Toast.makeText(this, "Data tersimpan!", Toast.LENGTH_SHORT).show()
-                        etFoodName.text?.clear()
-                        etSugarLevel.text?.clear()
-                        // Tidak perlu loadData() karena listener otomatis update
-                    }, {
-                        Toast.makeText(this, "Gagal: ${it.message}", Toast.LENGTH_SHORT).show()
-                    })
+                    // Panggil fungsi di ViewModel
+                    viewModel.saveLog(food, sugar,
+                        onSuccess = {
+                            Toast.makeText(this, "Data tersimpan!", Toast.LENGTH_SHORT).show()
+                            etFoodName.text?.clear()
+                            etSugarLevel.text?.clear()
+                        },
+                        onFailure = { msg ->
+                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 }
             } else {
                 Toast.makeText(this, "Mohon lengkapi data", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // 2. Logic Pilih Tanggal
         btnPickDate.setOnClickListener {
             DatePickerDialog(this, { _, year, month, day ->
                 selectedDate.set(year, month, day)
                 updateDateLabel()
-                applyFilter() // Re-filter data saat tanggal berubah
+                applyFilter()
             }, selectedDate.get(Calendar.YEAR), selectedDate.get(Calendar.MONTH), selectedDate.get(Calendar.DAY_OF_MONTH)).show()
         }
 
-        // 3. Logic Tab Filter (Hari, Minggu, Bulan)
         toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 when (checkedId) {
@@ -101,19 +126,34 @@ class LogActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
+    // Lifecycle ViewModel
     override fun onStart() {
         super.onStart()
-        // AKTIFKAN REALTIME LISTENER
-        dbListener = FirestoreHelper.listenToFoodLogs { logs ->
-            allLogs = logs
-            applyFilter() // Update grafik otomatis begitu data masuk
-        }
+        viewModel.startListening()
     }
 
     override fun onStop() {
         super.onStop()
-        // Matikan listener untuk hemat baterai
-        dbListener?.remove()
+        viewModel.stopListening()
+    }
+
+    private fun showDeleteDialog(log: FoodLog) {
+        AlertDialog.Builder(this)
+            .setTitle("Hapus Catatan?")
+            .setMessage("Yakin ingin menghapus ${log.foodName}?")
+            .setPositiveButton("Hapus") { _, _ ->
+                // Panggil fungsi di ViewModel
+                viewModel.deleteLog(log.id,
+                    onSuccess = {
+                        Toast.makeText(this, "Terhapus", Toast.LENGTH_SHORT).show()
+                    },
+                    onFailure = { msg ->
+                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun setupChart() {
@@ -132,22 +172,22 @@ class LogActivity : AppCompatActivity() {
     }
 
     private fun applyFilter() {
-        if (allLogs.isEmpty()) return
+        if (allLogs.isEmpty()) {
+            lineChart.clear()
+            return
+        }
 
         val filteredLogs = mutableListOf<FoodLog>()
         val calLog = Calendar.getInstance()
 
         allLogs.forEach { log ->
             calLog.time = log.timestamp
-
-            // Cek Kesamaan Hari/Tahun
             val sameDay = calLog.get(Calendar.DAY_OF_YEAR) == selectedDate.get(Calendar.DAY_OF_YEAR) &&
                     calLog.get(Calendar.YEAR) == selectedDate.get(Calendar.YEAR)
 
             when (currentFilterType) {
                 "DAY" -> if (sameDay) filteredLogs.add(log)
                 "WEEK" -> {
-                    // Cek range 7 hari ke belakang
                     val diff = selectedDate.timeInMillis - log.timestamp.time
                     val daysDiff = diff / (1000 * 60 * 60 * 24)
                     if (daysDiff in 0..7) filteredLogs.add(log)
@@ -167,7 +207,6 @@ class LogActivity : AppCompatActivity() {
         val sortedLogs = logs.sortedBy { it.timestamp }
         val entries = ArrayList<Entry>()
         val labels = ArrayList<String>()
-
         val dateFormat = if (currentFilterType == "DAY") SimpleDateFormat("HH:mm", Locale.getDefault())
         else SimpleDateFormat("dd/MM", Locale.getDefault())
 
@@ -189,9 +228,8 @@ class LogActivity : AppCompatActivity() {
         dataSet.circleRadius = 5f
         dataSet.setCircleColor(getColor(R.color.blue))
         dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
-        dataSet.setDrawValues(false) // Nilai sembunyi, muncul pas diklik
+        dataSet.setDrawValues(false)
 
-        // POPUP DETAIL
         val marker = CustomMarkerView(this, R.layout.custom_marker_view, sortedLogs)
         marker.chartView = lineChart
         lineChart.marker = marker
