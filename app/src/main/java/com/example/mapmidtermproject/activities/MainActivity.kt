@@ -10,8 +10,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.adapters.CarouselAdapter
 import com.example.mapmidtermproject.adapters.NewsAdapter
-import com.example.mapmidtermproject.data.NewsData
 import com.example.mapmidtermproject.settings.SettingsActivity
+import com.example.mapmidtermproject.utils.FirestoreHelper
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -21,17 +21,16 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var carouselViewPager: ViewPager2
     private lateinit var auth: FirebaseAuth
+    private lateinit var newsAdapter: NewsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Auth Init
         auth = Firebase.auth
-
-        // Cek Login di awal
         if (auth.currentUser == null) {
-            goToLogin()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
             return
         }
 
@@ -52,35 +51,38 @@ class MainActivity : AppCompatActivity() {
         )
         carouselViewPager.adapter = CarouselAdapter(carouselImages)
 
-        // RecyclerView setup
+        // RecyclerView News setup
         val rvNews = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvNews)
         rvNews.layoutManager = LinearLayoutManager(this)
-        val newsList = NewsData.getNewsList()
-        val adapter = NewsAdapter(newsList) { article ->
+
+        // Adapter awal kosong
+        newsAdapter = NewsAdapter(emptyList()) { article ->
             val intent = Intent(this, NewsDetailActivity::class.java)
             intent.putExtra("EXTRA_ARTICLE", article)
             startActivity(intent)
         }
-        rvNews.adapter = adapter
+        rvNews.adapter = newsAdapter
+
+        // --- LOAD BERITA ---
+        // Ini akan otomatis upload dummy jika kosong, lalu menampilkannya
+        loadNews()
 
         setupBottomNavigation()
     }
 
-    // --- FITUR KEAMANAN (AUTH GUARD) ---
-    override fun onStart() {
-        super.onStart()
-        // Cek setiap kali user masuk ke halaman ini
-        // Jika user null (misal baru saja dihapus), langsung tendang
-        if (auth.currentUser == null) {
-            goToLogin()
+    private fun loadNews() {
+        FirestoreHelper.getNews { newsList ->
+            // Update UI saat data siap
+            newsAdapter.updateData(newsList)
         }
     }
 
-    private fun goToLogin() {
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+    override fun onStart() {
+        super.onStart()
+        if (auth.currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
     }
 
     private fun setupBottomNavigation() {

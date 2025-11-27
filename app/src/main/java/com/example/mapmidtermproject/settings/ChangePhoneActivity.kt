@@ -25,9 +25,12 @@ class ChangePhoneActivity : AppCompatActivity() {
             if (phone.isEmpty()) {
                 Toast.makeText(this, "Nomor telepon tidak boleh kosong", Toast.LENGTH_SHORT).show()
             } else {
-                // UPDATE KE FIRESTORE
-                FirestoreHelper.updateUserProfile(username = null, phone = phone) {
-                    Toast.makeText(this, "Nomor telepon berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                btnSave.isEnabled = false
+                btnSave.text = "Menyimpan..."
+
+                // Panggil fungsi KHUSUS Phone
+                FirestoreHelper.updatePhone(phone) {
+                    Toast.makeText(this, "Nomor telepon berhasil disimpan!", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }

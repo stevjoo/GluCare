@@ -25,13 +25,18 @@ class AccountSettingsActivity : AppCompatActivity() {
         val btnDeleteAccount = findViewById<MaterialButton>(R.id.btnDeleteAccount)
 
         btnBack.setOnClickListener { finish() }
-        btnChangeUsername.setOnClickListener { startActivity(Intent(this, ChangeUsernameActivity::class.java)) }
-        btnChangePhone.setOnClickListener { startActivity(Intent(this, ChangePhoneActivity::class.java)) }
+
+        btnChangeUsername.setOnClickListener {
+            startActivity(Intent(this, ChangeUsernameActivity::class.java))
+        }
+        btnChangePhone.setOnClickListener {
+            startActivity(Intent(this, ChangePhoneActivity::class.java))
+        }
 
         btnDeleteAccount.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Hapus Akun Permanen?")
-                .setMessage("Yakin ingin menghapus? Anda akan langsung keluar dari aplikasi.")
+                .setMessage("Yakin ingin menghapus? Aplikasi akan langsung keluar.")
                 .setPositiveButton("Hapus") { _, _ -> processDeleteAccount() }
                 .setNegativeButton("Batal", null)
                 .show()
@@ -39,7 +44,6 @@ class AccountSettingsActivity : AppCompatActivity() {
     }
 
     private fun processDeleteAccount() {
-        // Tampilkan loading
         val loading = AlertDialog.Builder(this)
             .setMessage("Menghapus akun...")
             .setCancelable(false)
@@ -48,50 +52,34 @@ class AccountSettingsActivity : AppCompatActivity() {
 
         FirestoreHelper.deleteAccount(
             onSuccess = {
-                // --- SUKSES HAPUS ---
-                loading.dismiss() // 1. Matikan loading SEGERA
-
-                // 2. Bersihkan sesi Google (Fire-and-forget, jangan ditunggu)
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                loading.dismiss()
+                // Logout Google tanpa menunggu
                 try {
-                    GoogleSignIn.getClient(this, gso).signOut()
+                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                    val client = GoogleSignIn.getClient(this, gso)
+                    client.signOut()
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
-                // 3. LANGSUNG TENDANG KE LOGIN
-                Toast.makeText(this, "Akun berhasil dihapus.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Akun dihapus.", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
-                finishAffinity() // Tutup semua activity di belakang
+                finishAffinity()
             },
             onReauthRequired = {
-                // --- PERLU LOGIN ULANG ---
                 loading.dismiss()
                 AlertDialog.Builder(this)
-                    .setTitle("Gagal: Sesi Habis")
-                    .setMessage("Demi keamanan, mohon Logout dulu lalu Login kembali, baru coba hapus akun lagi.")
-                    .setPositiveButton("Logout Sekarang") { _, _ ->
-                        forceLogout()
-                    }
-                    .setNegativeButton("Batal", null)
+                    .setTitle("Keamanan")
+                    .setMessage("Mohon Logout dan Login ulang sebelum menghapus akun.")
+                    .setPositiveButton("OK", null)
                     .show()
             },
             onFailure = { e ->
-                // --- ERROR ---
                 loading.dismiss()
                 Toast.makeText(this, "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         )
-    }
-
-    private fun forceLogout() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-        GoogleSignIn.getClient(this, gso).signOut()
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finishAffinity()
     }
 }

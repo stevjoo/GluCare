@@ -19,6 +19,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
+// PENTING: Import manual Activity settings agar dikenali
+import com.example.mapmidtermproject.settings.AccountSettingsActivity
+import com.example.mapmidtermproject.settings.FAQActivity
+import com.example.mapmidtermproject.settings.PrivacyPolicyActivity
+
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -39,9 +44,18 @@ class SettingsActivity : AppCompatActivity() {
         val btnPrivacyPolicy = findViewById<LinearLayout>(R.id.btnPrivacyPolicy)
         val btnLogout = findViewById<Button>(R.id.btnLogout)
 
-        btnAccount.setOnClickListener { startActivity(Intent(this, AccountSettingsActivity::class.java)) }
-        btnFAQ.setOnClickListener { startActivity(Intent(this, FAQActivity::class.java)) }
-        btnPrivacyPolicy.setOnClickListener { startActivity(Intent(this, PrivacyPolicyActivity::class.java)) }
+        btnAccount.setOnClickListener {
+            startActivity(Intent(this, AccountSettingsActivity::class.java))
+        }
+
+        btnFAQ.setOnClickListener {
+            startActivity(Intent(this, FAQActivity::class.java))
+        }
+
+        btnPrivacyPolicy.setOnClickListener {
+            startActivity(Intent(this, PrivacyPolicyActivity::class.java))
+        }
+
         btnLogout.setOnClickListener { signOut() }
 
         setupBottomNavigation()
@@ -54,26 +68,17 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun loadUserData() {
         val currentUser = auth.currentUser
-        val googleName = currentUser?.displayName ?: "Pengguna GluCare"
+        if (currentUser == null) return
 
-        // 1. Tampilkan nama Google dulu sebagai placeholder (agar tidak kosong/loading lama)
+        val googleName = currentUser.displayName ?: "Pengguna"
         tvUsername.text = googleName
         tvPhone.text = "Memuat..."
 
-        // 2. Cek Database untuk data custom
         FirestoreHelper.getUserProfile { profile ->
             if (profile != null) {
-                // Jika user pernah edit nama, pakai nama dari DB. Jika tidak, tetap pakai Google Name
-                if (!profile.username.isNullOrEmpty()) {
-                    tvUsername.text = profile.username
-                } else {
-                    tvUsername.text = googleName
-                }
-
-                // Telepon
-                tvPhone.text = profile.phone ?: "Belum diatur"
+                tvUsername.text = if (!profile.username.isNullOrEmpty()) profile.username else googleName
+                tvPhone.text = if (!profile.phone.isNullOrEmpty()) profile.phone else "Belum diatur"
             } else {
-                // User baru (belum ada data di DB), biarkan nama Google
                 tvUsername.text = googleName
                 tvPhone.text = "Belum diatur"
             }
@@ -81,14 +86,25 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        // ... (KODE SAMA SEPERTI SEBELUMNYA) ...
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNav.selectedItemId = R.id.nav_settings
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> { startActivity(Intent(this, MainActivity::class.java)); overridePendingTransition(0, 0); true }
-                R.id.nav_log -> { startActivity(Intent(this, LogActivity::class.java)); overridePendingTransition(0, 0); true }
-                R.id.nav_camera -> { startActivity(Intent(this, AnalysisActivity::class.java)); overridePendingTransition(0, 0); true }
+                R.id.nav_home -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_log -> {
+                    startActivity(Intent(this, LogActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_camera -> {
+                    startActivity(Intent(this, AnalysisActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    true
+                }
                 R.id.nav_settings -> true
                 else -> false
             }

@@ -25,13 +25,13 @@ class ChangeUsernameActivity : AppCompatActivity() {
             if (username.isEmpty()) {
                 Toast.makeText(this, "Username tidak boleh kosong", Toast.LENGTH_SHORT).show()
             } else {
-                // Tampilkan pesan loading kecil
                 btnSave.isEnabled = false
                 btnSave.text = "Menyimpan..."
 
-                FirestoreHelper.updateUserProfile(username, null) {
-                    Toast.makeText(this, "Username diperbarui!", Toast.LENGTH_SHORT).show()
-                    finish() // Kembali ke Settings, onResume di sana akan memuat nama baru
+                // Panggil fungsi KHUSUS Username
+                FirestoreHelper.updateUsername(username) {
+                    Toast.makeText(this, "Username berhasil disimpan!", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
             }
         }

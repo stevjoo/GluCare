@@ -9,7 +9,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapmidtermproject.R
-import com.example.mapmidtermproject.utils.UserRepository
+// Hapus UserRepository, ganti dengan FirestoreHelper
+import com.example.mapmidtermproject.utils.FirestoreHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -73,8 +74,12 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val u = auth.currentUser!!
-                    UserRepository.upsertUser(u)
+                    // --- PERBAIKAN DISINI ---
+                    // Jangan pakai UserRepository.upsertUser(u) karena itu menimpa data.
+                    // Pakai ini agar data lama (No HP) tetap aman:
+                    FirestoreHelper.initUserDataIfNew()
+                    // ------------------------
+
                     Toast.makeText(this, "Login Berhasil!", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
