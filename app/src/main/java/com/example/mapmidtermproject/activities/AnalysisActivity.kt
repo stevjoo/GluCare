@@ -63,16 +63,16 @@ class AnalysisActivity : AppCompatActivity() {
 
         btnViewGallery.setOnClickListener {
             startActivity(Intent(this, LocalGalleryActivity::class.java))
+            // TETAP PERTAHANKAN SLIDE KHUSUS UTK GALERI LOKAL
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         setupBottomNavigation()
     }
 
-    // --- FIX UTAMA: PASTIKAN ICON BENAR SAAT HALAMAN MUNCUL ---
     override fun onResume() {
         super.onResume()
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        // Paksa set icon Camera menjadi aktif setiap kali halaman ini tampil
         if (bottomNav.selectedItemId != R.id.nav_camera) {
             bottomNav.selectedItemId = R.id.nav_camera
         }
@@ -99,11 +99,7 @@ class AnalysisActivity : AppCompatActivity() {
     }
 
     private fun showResultDialog() {
-        // --- MACHINE LEARNING DUMMY ---
         val isDiabetic = Random.nextBoolean()
-        // ------------------------------
-
-        // SIMPAN KE INTERNAL STORAGE
         currentImageUri?.let {
             viewModel.saveImage(it)
             Toast.makeText(this, "Foto tersimpan di Galeri Lokal", Toast.LENGTH_SHORT).show()
@@ -131,36 +127,26 @@ class AnalysisActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    // --- NAVIGASI YANG SUDAH DIPERBAIKI (ANIMASI AKTIF) ---
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-
-        // HAPUS set selectedItemId dari sini karena sudah dipindah ke onResume
-        // bottomNav.selectedItemId = R.id.nav_camera
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    startActivity(intent)
-                    overridePendingTransition(0, 0)
+                    startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_log -> {
-                    val intent = Intent(this, LogActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    startActivity(intent)
-                    overridePendingTransition(0, 0)
+                    startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    // HAPUS overridePendingTransition
                     true
                 }
-                R.id.nav_camera -> {
-                    true // Sudah di halaman ini
-                }
+                R.id.nav_camera -> true
                 R.id.nav_settings -> {
-                    val intent = Intent(this, SettingsActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-                    startActivity(intent)
-                    overridePendingTransition(0, 0)
+                    startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    // HAPUS overridePendingTransition
                     true
                 }
                 else -> false

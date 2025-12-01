@@ -18,9 +18,10 @@ class NewsDetailActivity : AppCompatActivity() {
         val tvArticleTitle: TextView = findViewById(R.id.tvArticleTitle)
         val tvArticleContent: TextView = findViewById(R.id.tvArticleContent)
 
-        btnBack.setOnClickListener { finish() }
+        btnBack.setOnClickListener {
+            finish()
+        }
 
-        // Terima data
         val article = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getSerializableExtra("EXTRA_ARTICLE", NewsArticle::class.java)
         } else {
@@ -31,7 +32,6 @@ class NewsDetailActivity : AppCompatActivity() {
             tvArticleTitle.text = it.title
             tvArticleContent.text = it.content
 
-            // Konversi String Gambar Database ke Drawable
             val imageResId = resources.getIdentifier(it.imageCode, "drawable", packageName)
             if (imageResId != 0) {
                 ivArticleImage.setImageResource(imageResId)
@@ -39,5 +39,11 @@ class NewsDetailActivity : AppCompatActivity() {
                 ivArticleImage.setImageResource(R.drawable.ic_image_placeholder)
             }
         }
+    }
+
+    override fun finish() {
+        super.finish()
+        // Animasi Slide Balik (Kiri)
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
     }
 }

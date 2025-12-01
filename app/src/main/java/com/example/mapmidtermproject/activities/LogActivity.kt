@@ -125,16 +125,15 @@ class LogActivity : AppCompatActivity() {
         viewModel.stopListening()
     }
 
-    // --- FIX NAVIGASI ---
     override fun onResume() {
         super.onResume()
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        // Paksa highlight tombol Jurnal saat halaman ini aktif
         if (bottomNav.selectedItemId != R.id.nav_log) {
             bottomNav.selectedItemId = R.id.nav_log
         }
     }
 
+    // --- NAVIGASI YANG SUDAH DIPERBAIKI (ANIMASI AKTIF) ---
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
@@ -142,18 +141,18 @@ class LogActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
+                    // HAPUS overridePendingTransition AGAR ANIMASI FADE JALAN
                     true
                 }
-                R.id.nav_log -> true // Sudah di sini
+                R.id.nav_log -> true
                 R.id.nav_camera -> {
                     startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
+                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_settings -> {
                     startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
+                    // HAPUS overridePendingTransition
                     true
                 }
                 else -> false
@@ -161,7 +160,6 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    // ... (Fungsi showDeleteDialog, setupChart, dll TETAP SAMA seperti kode sebelumnya) ...
     private fun showDeleteDialog(log: FoodLog) {
         AlertDialog.Builder(this)
             .setTitle("Hapus Catatan?")

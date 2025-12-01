@@ -63,18 +63,16 @@ class SettingsActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
-    // --- FIX NAVIGASI ---
     override fun onResume() {
         super.onResume()
         viewModel.loadProfile()
-
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        // Paksa highlight tombol Akun
         if (bottomNav.selectedItemId != R.id.nav_settings) {
             bottomNav.selectedItemId = R.id.nav_settings
         }
     }
 
+    // --- NAVIGASI YANG SUDAH DIPERBAIKI (ANIMASI AKTIF) ---
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
@@ -82,20 +80,20 @@ class SettingsActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
+                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_log -> {
                     startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
+                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_camera -> {
                     startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
+                    // HAPUS overridePendingTransition
                     true
                 }
-                R.id.nav_settings -> true // Sudah di sini
+                R.id.nav_settings -> true
                 else -> false
             }
         }

@@ -9,59 +9,119 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity">
 
-    <!-- Konten Utama (Di atas Navbar) -->
-    <LinearLayout
-        android:id="@+id/main_content"
+    <!-- Konten Scrollable -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
+        android:fillViewport="true"
+        android:clipToPadding="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/carouselViewPager"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="8dp" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="20dp">
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
 
-            <TextView
-                android:layout_width="0dp"
+            <!-- HEADER SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Diabetes Info"
-                android:textColor="#000"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal"
+                android:padding="24dp"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tvViewAll"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvGreeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Halo, User!"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/blue"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Jaga kesehatanmu hari ini."
+                        android:textSize="14sp"
+                        android:textColor="#7F7F7F"/>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="43dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/glucareicon" />
+            </LinearLayout>
+
+            <!-- CAROUSEL SECTION -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="View All"
-                android:textColor="#00796B"
-                android:textStyle="bold" />
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/carouselViewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- NEWS HEADER -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Artikel Terbaru"
+                    android:textColor="#000"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvViewAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lihat Semua"
+                    android:textColor="@color/blue"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+            </LinearLayout>
+
+            <!-- NEWS LIST -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvNews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:paddingHorizontal="16dp"
+                android:nestedScrollingEnabled="false" />
+            <!-- nestedScrollingEnabled=false PENTING agar scroll lancar di dalam NestedScrollView -->
+
         </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvNews"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingHorizontal="16dp" />
-    </LinearLayout>
-
-    <!-- Navbar (Terkunci di Bawah) -->
+    <!-- Navbar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         style="@style/Widget.App.BottomNavigationView.NoRipple"
