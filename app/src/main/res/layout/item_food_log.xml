@@ -1,22 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="8dp"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="2dp"
+    app:cardCornerRadius="16dp"
     app:cardElevation="2dp"
-    app:cardBackgroundColor="@android:color/white">
+    app:cardBackgroundColor="@android:color/white"
+    app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:padding="16dp">
 
-        <!-- Info Makanan & Waktu -->
+        <!-- 1. Ikon Dekoratif (Lingkaran Biru Muda) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#E3F2FD"
+            app:strokeWidth="0dp"
+            android:layout_marginEnd="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_baseline_medical_information_24"
+                app:tint="@color/blue"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 2. Info Makanan & Waktu -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -28,40 +48,65 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Nasi Goreng"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
-                android:textSize="16sp"/>
+                android:textColor="#212121"
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
             <TextView
                 android:id="@+id/tvDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="12 Nov 2025, 12:30"
+                android:text="12 Nov, 12:30"
                 android:textSize="12sp"
-                android:textColor="@color/gray"/>
+                android:textColor="#9E9E9E"
+                android:layout_marginTop="2dp"/>
         </LinearLayout>
 
-        <!-- Nilai Gula Darah -->
-        <TextView
-            android:id="@+id/tvSugar"
+        <!-- 3. Nilai Gula Darah -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="120 mg/dL"
-            android:textStyle="bold"
-            android:textColor="@color/blue"
-            android:textSize="14sp"
-            android:layout_marginEnd="16dp"/>
+            android:orientation="vertical"
+            android:gravity="end"
+            android:layout_marginEnd="12dp">
 
-        <!-- Tombol Hapus -->
+            <TextView
+                android:id="@+id/tvSugar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="120"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/blue"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="mg/dL"
+                android:textSize="10sp"
+                android:textColor="@color/blue"
+                android:alpha="0.8"/>
+        </LinearLayout>
+
+        <!-- 4. Tombol Hapus (Divider Vertikal Tipis) -->
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#EEEEEE"
+            android:layout_marginEnd="8dp"/>
+
         <ImageView
             android:id="@+id/btnDelete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="6dp"
             android:src="@android:drawable/ic_menu_delete"
-            app:tint="#D32F2F"
+            app:tint="#EF5350"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>
