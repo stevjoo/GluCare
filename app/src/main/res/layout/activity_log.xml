@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
+    android:background="@color/white_primary"
     android:fitsSystemWindows="true">
 
     <ScrollView
@@ -236,7 +236,7 @@
                             android:textSize="12sp"
                             android:textColor="#009688"
                             android:backgroundTint="#E0F2F1"
-                            app:cornerRadius="20dp"/>
+                            app:cornerRadius="10dp"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnSortWeek"
@@ -248,7 +248,7 @@
                             android:textSize="12sp"
                             android:textColor="#009688"
                             android:backgroundTint="#E0F2F1"
-                            app:cornerRadius="20dp"
+                            app:cornerRadius="10dp"
                             android:layout_marginHorizontal="4dp"/>
 
                         <com.google.android.material.button.MaterialButton
@@ -261,7 +261,7 @@
                             android:textSize="12sp"
                             android:textColor="#009688"
                             android:backgroundTint="#E0F2F1"
-                            app:cornerRadius="20dp"/>
+                            app:cornerRadius="10dp"/>
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <com.github.mikephil.charting.charts.LineChart
@@ -312,7 +312,7 @@
         style="@style/Widget.MaterialComponents.BottomNavigationView.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/white_primary"
         app:elevation="20dp"
         app:itemIconTint="#009688"
         app:itemTextColor="#009688"
