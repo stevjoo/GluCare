@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.MAPMidTermProject" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+    <style name="Theme.MAPMidTermProject" parent="Base.Theme.MAPMidTermProject" />
 
     <style name="Theme.MAPMidTermProject.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white_primary</item>
@@ -12,5 +12,22 @@
 
     <style name="Widget.App.BottomNavigationView.NoRipple" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemRippleColor">@color/transparent_selector</item>
+    </style>
+
+    <!-- TAMBAHAN: Style Dasar dengan Animasi -->
+    <style name="Base.Theme.MAPMidTermProject" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blue</item>
+        <item name="android:statusBarColor">@color/white_primary</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Terapkan Animasi -->
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+    </style>
+
+    <!-- Definisi Animasi Transisi -->
+    <style name="WindowAnimationTransition">
+        <item name="android:activityOpenEnterAnimation">@anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/fade_out</item>
     </style>
 </resources>

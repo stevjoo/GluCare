@@ -12,7 +12,7 @@ import com.example.mapmidtermproject.activities.AnalysisActivity
 import com.example.mapmidtermproject.activities.LogActivity
 import com.example.mapmidtermproject.activities.LoginActivity
 import com.example.mapmidtermproject.activities.MainActivity
-import com.example.mapmidtermproject.viewmodels.UserViewModel // Import VM
+import com.example.mapmidtermproject.viewmodels.UserViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -47,7 +47,6 @@ class SettingsActivity : AppCompatActivity() {
         btnPrivacyPolicy.setOnClickListener { startActivity(Intent(this, PrivacyPolicyActivity::class.java)) }
         btnLogout.setOnClickListener { signOut() }
 
-        // Observasi Data Profil
         viewModel.userProfile.observe(this) { profile ->
             val currentUser = auth.currentUser
             val googleName = currentUser?.displayName ?: "Pengguna"
@@ -64,33 +63,39 @@ class SettingsActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
+    // --- FIX NAVIGASI ---
     override fun onResume() {
         super.onResume()
-        viewModel.loadProfile() // Load data via ViewModel
+        viewModel.loadProfile()
+
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        // Paksa highlight tombol Akun
+        if (bottomNav.selectedItemId != R.id.nav_settings) {
+            bottomNav.selectedItemId = R.id.nav_settings
+        }
     }
 
-    // ... (Fungsi setupBottomNavigation & signOut TETAP SAMA) ...
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_settings
+
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java))
+                    startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
                     overridePendingTransition(0, 0)
                     true
                 }
                 R.id.nav_log -> {
-                    startActivity(Intent(this, LogActivity::class.java))
+                    startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
                     overridePendingTransition(0, 0)
                     true
                 }
                 R.id.nav_camera -> {
-                    startActivity(Intent(this, AnalysisActivity::class.java))
+                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
                     overridePendingTransition(0, 0)
                     true
                 }
-                R.id.nav_settings -> true
+                R.id.nav_settings -> true // Sudah di sini
                 else -> false
             }
         }

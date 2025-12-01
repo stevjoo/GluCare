@@ -12,7 +12,7 @@ import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.adapters.CarouselAdapter
 import com.example.mapmidtermproject.adapters.NewsAdapter
 import com.example.mapmidtermproject.settings.SettingsActivity
-import com.example.mapmidtermproject.viewmodels.NewsViewModel // Import VM
+import com.example.mapmidtermproject.viewmodels.NewsViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -62,12 +62,10 @@ class MainActivity : AppCompatActivity() {
         }
         rvNews.adapter = newsAdapter
 
-        // OBSERVASI DATA (MVVM)
         viewModel.newsList.observe(this) { list ->
             newsAdapter.updateData(list)
         }
 
-        // Panggil Load
         viewModel.loadNews()
 
         setupBottomNavigation()
@@ -81,14 +79,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ... (Setup Bottom Nav SAMA) ...
+    // --- FIX NAVIGASI ---
+    override fun onResume() {
+        super.onResume()
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        // Paksa highlight tombol Home saat halaman ini aktif
+        if (bottomNav.selectedItemId != R.id.nav_home) {
+            bottomNav.selectedItemId = R.id.nav_home
+        }
+    }
+
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_home
+        // Hapus set default di sini, biarkan onResume yang menangani
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> true
+                R.id.nav_home -> true // Sudah di sini
                 R.id.nav_log -> {
                     startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
                     overridePendingTransition(0, 0)

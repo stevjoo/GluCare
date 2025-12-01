@@ -16,7 +16,7 @@ import com.example.mapmidtermproject.adapters.FoodLogAdapter
 import com.example.mapmidtermproject.settings.SettingsActivity
 import com.example.mapmidtermproject.utils.CustomMarkerView
 import com.example.mapmidtermproject.utils.FoodLog
-import com.example.mapmidtermproject.viewmodels.LogViewModel // MVVM IMPORT
+import com.example.mapmidtermproject.viewmodels.LogViewModel
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -32,9 +32,7 @@ import java.util.*
 
 class LogActivity : AppCompatActivity() {
 
-    // ViewModel Definition
     private lateinit var viewModel: LogViewModel
-
     private lateinit var etFoodName: TextInputEditText
     private lateinit var etSugarLevel: TextInputEditText
     private lateinit var lineChart: LineChart
@@ -49,7 +47,6 @@ class LogActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log)
 
-        // 1. Inisialisasi ViewModel
         viewModel = ViewModelProvider(this)[LogViewModel::class.java]
 
         etFoodName = findViewById(R.id.etFoodName)
@@ -62,24 +59,19 @@ class LogActivity : AppCompatActivity() {
         val toggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.toggleGroup)
         val rvLogs = findViewById<RecyclerView>(R.id.rvFoodLogs)
 
-        // 2. Setup RecyclerView (Adapter)
         rvLogs.layoutManager = LinearLayoutManager(this)
-        adapter = FoodLogAdapter { log ->
-            showDeleteDialog(log)
-        }
+        adapter = FoodLogAdapter { log -> showDeleteDialog(log) }
         rvLogs.adapter = adapter
 
-        // 3. Observasi Data dari ViewModel (Live Update)
         viewModel.logs.observe(this) { logs ->
             allLogs = logs
-            applyFilter() // Update Grafik
-            adapter.submitList(logs) // Update List
+            applyFilter()
+            adapter.submitList(logs)
         }
 
         setupChart()
         updateDateLabel()
 
-        // 4. Logic Tombol Simpan (Panggil ViewModel)
         btnSave.setOnClickListener {
             val food = etFoodName.text.toString()
             val sugarStr = etSugarLevel.text.toString()
@@ -87,16 +79,13 @@ class LogActivity : AppCompatActivity() {
             if (food.isNotEmpty() && sugarStr.isNotEmpty()) {
                 val sugar = sugarStr.toIntOrNull()
                 if (sugar != null) {
-                    // Panggil fungsi di ViewModel
                     viewModel.saveLog(food, sugar,
                         onSuccess = {
                             Toast.makeText(this, "Data tersimpan!", Toast.LENGTH_SHORT).show()
                             etFoodName.text?.clear()
                             etSugarLevel.text?.clear()
                         },
-                        onFailure = { msg ->
-                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                        }
+                        onFailure = { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() }
                     )
                 }
             } else {
@@ -126,7 +115,6 @@ class LogActivity : AppCompatActivity() {
         setupBottomNavigation()
     }
 
-    // Lifecycle ViewModel
     override fun onStart() {
         super.onStart()
         viewModel.startListening()
@@ -137,20 +125,49 @@ class LogActivity : AppCompatActivity() {
         viewModel.stopListening()
     }
 
+    // --- FIX NAVIGASI ---
+    override fun onResume() {
+        super.onResume()
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        // Paksa highlight tombol Jurnal saat halaman ini aktif
+        if (bottomNav.selectedItemId != R.id.nav_log) {
+            bottomNav.selectedItemId = R.id.nav_log
+        }
+    }
+
+    private fun setupBottomNavigation() {
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_log -> true // Sudah di sini
+                R.id.nav_camera -> {
+                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    // ... (Fungsi showDeleteDialog, setupChart, dll TETAP SAMA seperti kode sebelumnya) ...
     private fun showDeleteDialog(log: FoodLog) {
         AlertDialog.Builder(this)
             .setTitle("Hapus Catatan?")
             .setMessage("Yakin ingin menghapus ${log.foodName}?")
             .setPositiveButton("Hapus") { _, _ ->
-                // Panggil fungsi di ViewModel
-                viewModel.deleteLog(log.id,
-                    onSuccess = {
-                        Toast.makeText(this, "Terhapus", Toast.LENGTH_SHORT).show()
-                    },
-                    onFailure = { msg ->
-                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                    }
-                )
+                viewModel.deleteLog(log.id, { Toast.makeText(this, "Terhapus", Toast.LENGTH_SHORT).show() }, { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() })
             }
             .setNegativeButton("Batal", null)
             .show()
@@ -176,15 +193,11 @@ class LogActivity : AppCompatActivity() {
             lineChart.clear()
             return
         }
-
         val filteredLogs = mutableListOf<FoodLog>()
         val calLog = Calendar.getInstance()
-
         allLogs.forEach { log ->
             calLog.time = log.timestamp
-            val sameDay = calLog.get(Calendar.DAY_OF_YEAR) == selectedDate.get(Calendar.DAY_OF_YEAR) &&
-                    calLog.get(Calendar.YEAR) == selectedDate.get(Calendar.YEAR)
-
+            val sameDay = calLog.get(Calendar.DAY_OF_YEAR) == selectedDate.get(Calendar.DAY_OF_YEAR) && calLog.get(Calendar.YEAR) == selectedDate.get(Calendar.YEAR)
             when (currentFilterType) {
                 "DAY" -> if (sameDay) filteredLogs.add(log)
                 "WEEK" -> {
@@ -193,10 +206,7 @@ class LogActivity : AppCompatActivity() {
                     if (daysDiff in 0..7) filteredLogs.add(log)
                 }
                 "MONTH" -> {
-                    if (calLog.get(Calendar.MONTH) == selectedDate.get(Calendar.MONTH) &&
-                        calLog.get(Calendar.YEAR) == selectedDate.get(Calendar.YEAR)) {
-                        filteredLogs.add(log)
-                    }
+                    if (calLog.get(Calendar.MONTH) == selectedDate.get(Calendar.MONTH) && calLog.get(Calendar.YEAR) == selectedDate.get(Calendar.YEAR)) filteredLogs.add(log)
                 }
             }
         }
@@ -207,20 +217,16 @@ class LogActivity : AppCompatActivity() {
         val sortedLogs = logs.sortedBy { it.timestamp }
         val entries = ArrayList<Entry>()
         val labels = ArrayList<String>()
-        val dateFormat = if (currentFilterType == "DAY") SimpleDateFormat("HH:mm", Locale.getDefault())
-        else SimpleDateFormat("dd/MM", Locale.getDefault())
-
+        val dateFormat = if (currentFilterType == "DAY") SimpleDateFormat("HH:mm", Locale.getDefault()) else SimpleDateFormat("dd/MM", Locale.getDefault())
         sortedLogs.forEachIndexed { index, log ->
             entries.add(Entry(index.toFloat(), log.bloodSugar.toFloat()))
             labels.add(dateFormat.format(log.timestamp))
         }
-
         if (entries.isEmpty()) {
             lineChart.clear()
             lineChart.setNoDataText("Tidak ada data pada periode ini.")
             return
         }
-
         val dataSet = LineDataSet(entries, "Gula Darah (mg/dL)")
         dataSet.color = getColor(R.color.blue)
         dataSet.valueTextColor = Color.BLACK
@@ -229,41 +235,13 @@ class LogActivity : AppCompatActivity() {
         dataSet.setCircleColor(getColor(R.color.blue))
         dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
         dataSet.setDrawValues(false)
-
         val marker = CustomMarkerView(this, R.layout.custom_marker_view, sortedLogs)
         marker.chartView = lineChart
         lineChart.marker = marker
-
         lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         lineChart.xAxis.granularity = 1f
         lineChart.data = LineData(dataSet)
         lineChart.animateY(800)
         lineChart.invalidate()
-    }
-
-    private fun setupBottomNavigation() {
-        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_log
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                R.id.nav_log -> true
-                R.id.nav_camera -> {
-                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                R.id.nav_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    overridePendingTransition(0, 0)
-                    true
-                }
-                else -> false
-            }
-        }
     }
 }

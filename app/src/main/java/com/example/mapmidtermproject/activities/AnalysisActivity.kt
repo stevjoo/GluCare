@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -14,6 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.mapmidtermproject.R
+import com.example.mapmidtermproject.settings.SettingsActivity
 import com.example.mapmidtermproject.viewmodels.WoundViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
@@ -24,10 +24,9 @@ class AnalysisActivity : AppCompatActivity() {
     private lateinit var ivWoundImage: ImageView
     private lateinit var btnSelectImage: MaterialButton
     private lateinit var btnStartAnalysis: MaterialButton
-    private lateinit var btnViewGallery: MaterialButton // Tombol Baru
+    private lateinit var btnViewGallery: MaterialButton
     private var currentImageUri: Uri? = null
 
-    // Panggil ViewModel
     private lateinit var viewModel: WoundViewModel
 
     private val cameraActivityLauncher =
@@ -47,14 +46,11 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
-        // Init ViewModel
         viewModel = ViewModelProvider(this)[WoundViewModel::class.java]
 
         ivWoundImage = findViewById(R.id.ivWoundImage)
         btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
-
-        // Tambahkan tombol ini di XML nanti
         btnViewGallery = findViewById(R.id.btnViewGallery)
 
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
@@ -66,11 +62,20 @@ class AnalysisActivity : AppCompatActivity() {
         }
 
         btnViewGallery.setOnClickListener {
-            // Buka Galeri Lokal
             startActivity(Intent(this, LocalGalleryActivity::class.java))
         }
 
         setupBottomNavigation()
+    }
+
+    // --- FIX UTAMA: PASTIKAN ICON BENAR SAAT HALAMAN MUNCUL ---
+    override fun onResume() {
+        super.onResume()
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        // Paksa set icon Camera menjadi aktif setiap kali halaman ini tampil
+        if (bottomNav.selectedItemId != R.id.nav_camera) {
+            bottomNav.selectedItemId = R.id.nav_camera
+        }
     }
 
     private fun onImageSelected(uri: Uri) {
@@ -94,11 +99,11 @@ class AnalysisActivity : AppCompatActivity() {
     }
 
     private fun showResultDialog() {
-        // --- MACHINE LEARNING DUMMY (Akan kita ganti nanti) ---
+        // --- MACHINE LEARNING DUMMY ---
         val isDiabetic = Random.nextBoolean()
-        // ----------------------------------------------------
+        // ------------------------------
 
-        // SIMPAN KE INTERNAL STORAGE (MVVM WAY)
+        // SIMPAN KE INTERNAL STORAGE
         currentImageUri?.let {
             viewModel.saveImage(it)
             Toast.makeText(this, "Foto tersimpan di Galeri Lokal", Toast.LENGTH_SHORT).show()
@@ -128,7 +133,38 @@ class AnalysisActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        bottomNav.selectedItemId = R.id.nav_camera
-        // ... (Kode navigasi sama seperti sebelumnya) ...
+
+        // HAPUS set selectedItemId dari sini karena sudah dipindah ke onResume
+        // bottomNav.selectedItemId = R.id.nav_camera
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(intent)
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_log -> {
+                    val intent = Intent(this, LogActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(intent)
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                R.id.nav_camera -> {
+                    true // Sudah di halaman ini
+                }
+                R.id.nav_settings -> {
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(intent)
+                    overridePendingTransition(0, 0)
+                    true
+                }
+                else -> false
+            }
+        }
     }
 }
