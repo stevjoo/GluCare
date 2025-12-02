@@ -1,5 +1,6 @@
 package com.example.mapmidtermproject.activities
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -17,7 +18,6 @@ import com.example.mapmidtermproject.settings.SettingsActivity
 import com.example.mapmidtermproject.viewmodels.WoundViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
-import kotlin.random.Random
 
 class AnalysisActivity : AppCompatActivity() {
 
@@ -28,6 +28,7 @@ class AnalysisActivity : AppCompatActivity() {
     private var currentImageUri: Uri? = null
 
     private lateinit var viewModel: WoundViewModel
+    private lateinit var loadingDialog: ProgressDialog // Biar user tau lagi mikir
 
     private val cameraActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -46,7 +47,14 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
+        // Init ViewModel
         viewModel = ViewModelProvider(this)[WoundViewModel::class.java]
+
+        // Init Loading Dialog (Optional tapi bagus buat UX)
+        loadingDialog = ProgressDialog(this).apply {
+            setMessage("Sedang Menganalisis...")
+            setCancelable(false)
+        }
 
         ivWoundImage = findViewById(R.id.ivWoundImage)
         btnSelectImage = findViewById(R.id.btnSelectImage)
@@ -56,18 +64,40 @@ class AnalysisActivity : AppCompatActivity() {
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
         ivWoundImage.setOnClickListener { showImageSourceDialog() }
 
+        // --- 1. TOMBOL START CUMA MEMICU ANALISIS ---
         btnStartAnalysis.setOnClickListener {
-            if (currentImageUri != null) showResultDialog()
-            else Toast.makeText(this, "Pilih gambar dulu!", Toast.LENGTH_SHORT).show()
+            if (currentImageUri != null) {
+                loadingDialog.show() // Munculin loading
+                viewModel.analyzeImage(currentImageUri!!) // Panggil AI beneran!
+            } else {
+                Toast.makeText(this, "Pilih gambar dulu!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         btnViewGallery.setOnClickListener {
             startActivity(Intent(this, LocalGalleryActivity::class.java))
-            // TETAP PERTAHANKAN SLIDE KHUSUS UTK GALERI LOKAL
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         setupBottomNavigation()
+        setupObservers() // Setup pengamat hasil AI
+    }
+
+    // --- 2. FUNGSI UNTUK MENGAMATI HASIL DARI VIEWMODEL ---
+    private fun setupObservers() {
+        // Observer: String Hasil Analisis (Teks lengkap)
+        viewModel.analysisResult.observe(this) { resultText ->
+            loadingDialog.dismiss() // Tutup loading
+
+            // Kita ambil status diabetes dari LiveData satunya lagi biar gampang if-else nya
+            val isDiabetic = viewModel.isDiabeticDetected.value ?: false
+
+            // Tampilkan Dialog dengan hasil ASLI dari AI
+            showResultDialog(isDiabetic, resultText)
+
+            // Simpan gambar otomatis kalau mau (Opsional)
+            currentImageUri?.let { viewModel.saveImage(it) }
+        }
     }
 
     override fun onResume() {
@@ -98,13 +128,8 @@ class AnalysisActivity : AppCompatActivity() {
         builder.show()
     }
 
-    private fun showResultDialog() {
-        val isDiabetic = Random.nextBoolean()
-        currentImageUri?.let {
-            viewModel.saveImage(it)
-            Toast.makeText(this, "Foto tersimpan di Galeri Lokal", Toast.LENGTH_SHORT).show()
-        }
-
+    // --- 3. DIALOG MENERIMA HASIL DARI AI, BUKAN RANDOM ---
+    private fun showResultDialog(isDiabetic: Boolean, detailText: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_custom_result, null)
         val builder = AlertDialog.Builder(this)
         builder.setView(dialogView)
@@ -115,19 +140,20 @@ class AnalysisActivity : AppCompatActivity() {
         val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
         val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
 
+        // Gunakan parameter isDiabetic yang dikirim dari ViewModel
         if (isDiabetic) {
             tvTitle.text = "Indikasi Ditemukan"
-            tvMessage.text = "Analisis menunjukkan ciri luka diabetes. Segera konsultasi ke dokter."
+            // Tampilkan detail text dari AI (misal: "Diabetic Wounds (85%)")
+            tvMessage.text = "$detailText\n\nSaran: Segera konsultasi ke dokter."
         } else {
-            tvTitle.text = "Hasil Normal"
-            tvMessage.text = "Tidak ditemukan ciri khas luka diabetes. Tetap jaga kebersihan luka."
+            tvTitle.text = "Hasil Normal / Tidak Jelas"
+            tvMessage.text = "$detailText\n\nSaran: Tetap jaga kebersihan luka."
         }
 
         btnPositive.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
-    // --- NAVIGASI YANG SUDAH DIPERBAIKI (ANIMASI AKTIF) ---
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
@@ -135,18 +161,15 @@ class AnalysisActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_log -> {
                     startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_camera -> true
                 R.id.nav_settings -> {
                     startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 else -> false

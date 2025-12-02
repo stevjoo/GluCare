@@ -35,6 +35,15 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        viewBinding = true
+//        mlModelBinding = true
+    }
+    
+    // Penting: Jangan kompres file TFLite agar bisa dibaca oleh library ML
+    aaptOptions {
+        noCompress("tflite")
+    }
 }
 
 dependencies {
@@ -68,6 +77,10 @@ dependencies {
 
     // Charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.9.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 
     // Testing
     testImplementation(libs.junit)
