@@ -1,47 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="@color/white_primary">
 
-    <RelativeLayout
-        android:id="@+id/headerLayout"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:background="@color/white_primary"
-        android:paddingHorizontal="24dp"
-        android:elevation="0dp">
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_arrow_left"
-            app:tint="@color/blue"
-            android:contentDescription="Kembali"
-            android:clickable="true"
-            android:focusable="true" />
-        <TextView
-            android:id="@+id/titleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:text="Kebijakan Privasi"
-            android:textColor="@color/blue"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </RelativeLayout>
+        app:elevation="0dp"
+        app:liftOnScroll="false"
+        android:stateListAnimator="@null"
+        android:theme="@style/ThemeOverlay.AppCompat.Light">
 
-    <ScrollView
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="32dp"
+            android:paddingBottom="16dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
+
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_arrow_left"
+                android:contentDescription="Kembali"
+                app:tint="@color/blue"
+                android:clickable="true"
+                android:focusable="true"
+                android:scaleType="centerInside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kebijakan Privasi"
+                android:textColor="@color/blue"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/privacyScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="57dp"
-        android:padding="24dp"
-        android:scrollbars="vertical">
+        android:fillViewport="true"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="24dp"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,56 +74,186 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/privacyContent"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="1. Pendahuluan"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 android:lineSpacingExtra="4dp"
-                android:text="1. Pendahuluan
-Kebijakan Privasi ini disusun untuk menjelaskan bagaimana GluCare mengumpulkan, menyimpan, dan mengelola informasi yang diberikan oleh User selama menggunakan aplikasi. Dengan tujuan membantu User dalam memonitor dan mengelola penggunaan aplikasi GluCare secara nyaman dan aman, kami berkomitmen menjaga privasi dan kenyamanan setiap User.
+                android:layout_marginTop="4dp"
+                android:text="Kebijakan Privasi ini disusun untuk menjelaskan bagaimana GluCare mengumpulkan, menyimpan, dan mengelola informasi yang diberikan oleh User selama menggunakan aplikasi. Dengan tujuan membantu User dalam memonitor dan mengelola penggunaan aplikasi GluCare secara nyaman dan aman, kami berkomitmen menjaga privasi dan kenyamanan setiap User." />
 
-2. Definisi
-Aplikasi: Mengacu pada aplikasi GluCare, platform digital yang digunakan untuk mendukung pengalaman monitoring dan penggunaan fitur terkait.
-User: Individu yang menggunakan aplikasi GluCare dan memiliki akses terhadap fitur di dalamnya.
-Informasi Penggunaan Aplikasi: Data yang berkaitan dengan aktivitas User di dalam aplikasi, termasuk tetapi tidak terbatas pada nama akun, nomor telepon, preferensi penggunaan, dan interaksi dengan fitur aplikasi.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="2. Definisi"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="Aplikasi: Mengacu pada aplikasi GluCare, platform digital yang digunakan untuk mendukung pengalaman monitoring dan penggunaan fitur terkait.\nUser: Individu yang menggunakan aplikasi GluCare dan memiliki akses terhadap fitur di dalamnya.\nInformasi Penggunaan Aplikasi: Data yang berkaitan dengan aktivitas User di dalam aplikasi, termasuk tetapi tidak terbatas pada nama akun, nomor telepon, preferensi penggunaan, dan interaksi dengan fitur aplikasi." />
 
-3. Informasi yang Dikumpulkan
-GluCare dapat mengumpulkan beberapa jenis informasi dari User, meliputi namun tidak terbatas pada:
-• Informasi Akun: Nama, nomor telepon, dan data lain yang dimasukkan saat pendaftaran atau pengaturan akun.
-• Data Aktivitas Aplikasi: Preferensi fitur, interaksi dengan menu, pengaturan akun, dan aktivitas lainnya yang terjadi di dalam aplikasi.
-• Data Teknis (jika diperlukan untuk pengembangan): Tipe perangkat, sistem operasi, versi aplikasi, serta log penggunaan aplikasi.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="3. Informasi yang Dikumpulkan"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="GluCare dapat mengumpulkan beberapa jenis informasi dari User, meliputi namun tidak terbatas pada:\n• Informasi Akun: Nama, nomor telepon, dan data lain yang dimasukkan saat pendaftaran atau pengaturan akun.\n• Data Aktivitas Aplikasi: Preferensi fitur, interaksi dengan menu, pengaturan akun, dan aktivitas lainnya yang terjadi di dalam aplikasi.\n• Data Teknis (jika diperlukan untuk pengembangan): Tipe perangkat, sistem operasi, versi aplikasi, serta log penggunaan aplikasi." />
 
-4. Tujuan Penggunaan Informasi
-Informasi yang dikumpulkan digunakan untuk:
-• Memungkinkan User mengakses dan menggunakan fitur aplikasi secara optimal.
-• Menyediakan pengalaman penggunaan yang lebih personal dan relevan.
-• Mendukung pengembangan fitur dan peningkatan kualitas aplikasi.
-• Menyediakan bantuan atau respon jika User menghubungi tim dukungan.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="4. Tujuan Penggunaan Informasi"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="Informasi yang dikumpulkan digunakan untuk:\n• Memungkinkan User mengakses dan menggunakan fitur aplikasi secara optimal.\n• Menyediakan pengalaman penggunaan yang lebih personal dan relevan.\n• Mendukung pengembangan fitur dan peningkatan kualitas aplikasi.\n• Menyediakan bantuan atau respon jika User menghubungi tim dukungan." />
 
-5. Keamanan Informasi
-GluCare menerapkan langkah-langkah pengamanan yang wajar untuk melindungi informasi penggunaan aplikasi dari akses yang tidak berwenang. Namun, User memahami bahwa tidak ada sistem digital yang sepenuhnya bebas dari risiko.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="5. Keamanan Informasi"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="GluCare menerapkan langkah-langkah pengamanan yang wajar untuk melindungi informasi penggunaan aplikasi dari akses yang tidak berwenang. Namun, User memahami bahwa tidak ada sistem digital yang sepenuhnya bebas dari risiko." />
 
-6. Hak User
-User memiliki hak untuk:
-• Mengubah atau memperbarui informasi akun (seperti nama atau nomor telepon) melalui menu pengaturan akun.
-• Menghubungi pihak pengelola aplikasi untuk permintaan penghapusan akun atau penghentian akses.
-• Menghentikan penggunaan aplikasi jika User tidak lagi menyetujui kebijakan ini.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="6. Hak User"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="User memiliki hak untuk:\n• Mengubah atau memperbarui informasi akun (seperti nama atau nomor telepon) melalui menu pengaturan akun.\n• Menghubungi pihak pengelola aplikasi untuk permintaan penghapusan akun atau penghentian akses.\n• Menghentikan penggunaan aplikasi jika User tidak lagi menyetujui kebijakan ini." />
 
-7. Batasan Tanggung Jawab
-GluCare tidak bertanggung jawab atas kerugian yang timbul akibat:
-• Kesalahan atau kelalaian User dalam menjaga keamanan perangkat atau akses akun.
-• Penggunaan aplikasi di luar konteks fungsi yang disediakan.
-• Gangguan teknis atau akses yang disebabkan oleh pihak ketiga.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="7. Batasan Tanggung Jawab"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="GluCare tidak bertanggung jawab atas kerugian yang timbul akibat:\n• Kesalahan atau kelalaian User dalam menjaga keamanan perangkat atau akses akun.\n• Penggunaan aplikasi di luar konteks fungsi yang disediakan.\n• Gangguan teknis atau akses yang disebabkan oleh pihak ketiga." />
 
-8. Perubahan Kebijakan
-Kebijakan ini dapat diperbarui sewaktu-waktu untuk menyesuaikan pengembangan aplikasi atau regulasi yang berlaku. GluCare akan memberikan pemberitahuan melalui aplikasi jika terdapat pembaruan penting.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="8. Perubahan Kebijakan"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="Kebijakan ini dapat diperbarui sewaktu-waktu untuk menyesuaikan pengembangan aplikasi atau regulasi yang berlaku. GluCare akan memberikan pemberitahuan melalui aplikasi jika terdapat pembaruan penting." />
 
-9. Kontak dan Dukungan
-Jika User memiliki pertanyaan atau memerlukan dukungan, User dapat menghubungi tim pengelola melalui kanal bantuan atau pusat dukungan yang tersedia di aplikasi.
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="9. Kontak dan Dukungan"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:text="Jika User memiliki pertanyaan atau memerlukan dukungan, User dapat menghubungi tim pengelola melalui kanal bantuan atau pusat dukungan yang tersedia di aplikasi." />
 
-10. Pernyataan Persetujuan
-Dengan melanjutkan penggunaan aplikasi GluCare, User menyatakan telah membaca, memahami, dan menyetujui seluruh isi Kebijakan Privasi ini." />
+            <TextView
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="10. Pernyataan Persetujuan"
+                android:textColor="@color/blue"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="32dp"
+                android:text="Dengan melanjutkan penggunaan aplikasi GluCare, User menyatakan telah membaca, memahami, dan menyetujui seluruh isi Kebijakan Privasi ini." />
+
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -2,10 +2,11 @@ package com.example.mapmidtermproject.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import com.google.android.material.textfield.TextInputEditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.activities.AnalysisActivity
@@ -23,8 +24,9 @@ import com.google.firebase.ktx.Firebase
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var tvUsername: TextView
-    private lateinit var tvPhone: TextView
+    // Di XML kamu menggunakan TextInputEditText, bukan TextView biasa
+    private lateinit var etUsername: TextInputEditText
+    private lateinit var etPhone: TextInputEditText
     private lateinit var viewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,13 +36,21 @@ class SettingsActivity : AppCompatActivity() {
         auth = Firebase.auth
         viewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
-        tvUsername = findViewById(R.id.tvUsername)
-        tvPhone = findViewById(R.id.tvPhone)
+        // --- BINDING ID SESUAI XML TERBARU ---
+        etUsername = findViewById(R.id.et_username)
+        etPhone = findViewById(R.id.et_phone)
 
-        val btnAccount = findViewById<LinearLayout>(R.id.btnAccount)
-        val btnFAQ = findViewById<LinearLayout>(R.id.btnFAQ)
-        val btnPrivacyPolicy = findViewById<LinearLayout>(R.id.btnPrivacyPolicy)
-        val btnLogout = findViewById<Button>(R.id.btnLogout)
+        // Tombol menu sekarang menggunakan ConstraintLayout (cl_...)
+        val btnAccount = findViewById<ConstraintLayout>(R.id.cl_menu_account)
+        val btnFAQ = findViewById<ConstraintLayout>(R.id.cl_menu_faq)
+        val btnPrivacyPolicy = findViewById<ConstraintLayout>(R.id.cl_menu_privacy)
+
+        // Tombol logout ID-nya btn_logout
+        val btnLogout = findViewById<Button>(R.id.btn_logout)
+
+        // Agar EditText hanya untuk tampilan (read-only) di halaman ini:
+        etUsername.keyListener = null
+        etPhone.keyListener = null
 
         btnAccount.setOnClickListener { startActivity(Intent(this, AccountSettingsActivity::class.java)) }
         btnFAQ.setOnClickListener { startActivity(Intent(this, FAQActivity::class.java)) }
@@ -52,11 +62,12 @@ class SettingsActivity : AppCompatActivity() {
             val googleName = currentUser?.displayName ?: "Pengguna"
 
             if (profile != null) {
-                tvUsername.text = if (!profile.username.isNullOrEmpty()) profile.username else googleName
-                tvPhone.text = if (!profile.phone.isNullOrEmpty()) profile.phone else "Belum diatur"
+                // setText tetap bekerja untuk EditText
+                etUsername.setText(if (!profile.username.isNullOrEmpty()) profile.username else googleName)
+                etPhone.setText(if (!profile.phone.isNullOrEmpty()) profile.phone else "Belum diatur")
             } else {
-                tvUsername.text = googleName
-                tvPhone.text = "Belum diatur"
+                etUsername.setText(googleName)
+                etPhone.setText("Belum diatur")
             }
         }
 
@@ -72,7 +83,6 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    // --- NAVIGASI YANG SUDAH DIPERBAIKI (ANIMASI AKTIF) ---
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
@@ -80,17 +90,14 @@ class SettingsActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_log -> {
                     startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_camera -> {
                     startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 R.id.nav_settings -> true

@@ -3,7 +3,7 @@ package com.example.mapmidtermproject.activities
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -17,25 +17,33 @@ class LocalGalleryActivity : AppCompatActivity() {
 
     private lateinit var viewModel: WoundViewModel
     private lateinit var adapter: LocalImageAdapter
-    private lateinit var tvEmpty: TextView
+
+    // PERBAIKAN 1: Ganti TextView menjadi LinearLayout (sesuai XML baru)
+    private lateinit var layoutEmptyState: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_gallery)
 
         val btnBack = findViewById<ImageView>(R.id.btnBack)
-        tvEmpty = findViewById(R.id.tvEmpty)
         val rvGallery = findViewById<RecyclerView>(R.id.rvGallery)
 
-        btnBack.setOnClickListener { finish() }
+        // PERBAIKAN 2: Bind ke ID layoutEmptyState yang baru dibuat di XML
+        layoutEmptyState = findViewById(R.id.layoutEmptyState)
+
+        btnBack.setOnClickListener {
+            finish()
+            // Opsional: Animasi keluar agar smooth (Slide ke kanan)
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+        }
 
         // Setup RecyclerView
-        rvGallery.layoutManager = GridLayoutManager(this, 2) // 2 Kolom
+        rvGallery.layoutManager = GridLayoutManager(this, 2) // Grid 2 Kolom
         adapter = LocalImageAdapter { localImage ->
-            // Logic Hapus saat item diklik panjang atau diklik
+            // Logic Hapus
             AlertDialog.Builder(this)
                 .setTitle("Hapus Foto?")
-                .setMessage("Foto ini akan dihapus dari penyimpanan internal.")
+                .setMessage("Foto ini akan dihapus permanen dari aplikasi.")
                 .setPositiveButton("Hapus") { _, _ ->
                     viewModel.deleteImage(localImage.file)
                 }
@@ -47,13 +55,14 @@ class LocalGalleryActivity : AppCompatActivity() {
         // Setup ViewModel
         viewModel = ViewModelProvider(this)[WoundViewModel::class.java]
 
-        // Observe Data (MVVM Magic)
+        // Observe Data
         viewModel.woundImages.observe(this) { images ->
             if (images.isEmpty()) {
-                tvEmpty.visibility = View.VISIBLE
+                // PERBAIKAN 3: Kontrol visibilitas Layout Empty State
+                layoutEmptyState.visibility = View.VISIBLE
                 rvGallery.visibility = View.GONE
             } else {
-                tvEmpty.visibility = View.GONE
+                layoutEmptyState.visibility = View.GONE
                 rvGallery.visibility = View.VISIBLE
                 adapter.submitList(images)
             }
@@ -61,5 +70,11 @@ class LocalGalleryActivity : AppCompatActivity() {
 
         // Load data awal
         viewModel.loadImages()
+    }
+
+    // Opsional: Handle tombol Back fisik di HP
+    override fun onBackPressed() {
+        super.onBackPressed()
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     }
 }

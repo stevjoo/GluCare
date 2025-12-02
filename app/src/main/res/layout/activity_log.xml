@@ -154,6 +154,7 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textAllCaps="false"
+                        android:textColor="@color/white"
                         app:cornerRadius="12dp"
                         android:elevation="0dp"
                         android:stateListAnimator="@null"
@@ -287,14 +288,6 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="#212121"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lihat Semua"
-                    android:textSize="12sp"
-                    android:textColor="#009688"
-                    android:textStyle="bold"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView

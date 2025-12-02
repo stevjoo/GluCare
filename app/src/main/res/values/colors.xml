@@ -22,4 +22,6 @@
     <color name="gc_teal">@color/blue</color>
     <color name="gc_disabled_text">@color/gray_text_disabled</color>
     <color name="gc_grey">@color/gray_light</color>
+
+    <color name="red_btn_color">#D32F2F</color>
 </resources>

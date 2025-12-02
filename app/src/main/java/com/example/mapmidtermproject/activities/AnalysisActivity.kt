@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -24,11 +26,14 @@ class AnalysisActivity : AppCompatActivity() {
     private lateinit var ivWoundImage: ImageView
     private lateinit var btnSelectImage: MaterialButton
     private lateinit var btnStartAnalysis: MaterialButton
-    private lateinit var btnViewGallery: MaterialButton
+
+    // PERBAIKAN DI SINI: Ubah tipe dari MaterialButton ke ImageView
+    private lateinit var btnViewGallery: ImageView
+
     private var currentImageUri: Uri? = null
 
     private lateinit var viewModel: WoundViewModel
-    private lateinit var loadingDialog: ProgressDialog // Biar user tau lagi mikir
+    private lateinit var loadingDialog: ProgressDialog
 
     private val cameraActivityLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -47,116 +52,181 @@ class AnalysisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
 
-        // Init ViewModel
         viewModel = ViewModelProvider(this)[WoundViewModel::class.java]
 
-        // Init Loading Dialog (Optional tapi bagus buat UX)
+        // Setup Loading
         loadingDialog = ProgressDialog(this).apply {
-            setMessage("Sedang Menganalisis...")
+            setMessage("Menganalisis Luka...")
             setCancelable(false)
         }
 
+        // Inisialisasi View
         ivWoundImage = findViewById(R.id.ivWoundImage)
         btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
+
+        // Casting ke ImageView (sesuai layout baru)
         btnViewGallery = findViewById(R.id.btnViewGallery)
 
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
-        ivWoundImage.setOnClickListener { showImageSourceDialog() }
 
-        // --- 1. TOMBOL START CUMA MEMICU ANALISIS ---
+        // Listener jika user klik area placeholder gambar
+        findViewById<ViewGroup>(R.id.cardWoundImage).setOnClickListener { showImageSourceDialog() }
+
         btnStartAnalysis.setOnClickListener {
             if (currentImageUri != null) {
-                loadingDialog.show() // Munculin loading
-                viewModel.analyzeImage(currentImageUri!!) // Panggil AI beneran!
+                loadingDialog.show()
+                viewModel.analyzeImage(uri = currentImageUri!!)
             } else {
-                Toast.makeText(this, "Pilih gambar dulu!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Mohon pilih gambar terlebih dahulu.", Toast.LENGTH_SHORT).show()
             }
         }
 
         btnViewGallery.setOnClickListener {
             startActivity(Intent(this, LocalGalleryActivity::class.java))
+            // Animasi transisi slide
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         setupBottomNavigation()
-        setupObservers() // Setup pengamat hasil AI
+        setupObservers()
     }
 
-    // --- 2. FUNGSI UNTUK MENGAMATI HASIL DARI VIEWMODEL ---
     private fun setupObservers() {
-        // Observer: String Hasil Analisis (Teks lengkap)
-        viewModel.analysisResult.observe(this) { resultText ->
-            loadingDialog.dismiss() // Tutup loading
+        // OBSERVE EVENT: Menggunakan Event Wrapper agar dialog tidak muncul 2x saat rotasi
+        viewModel.analysisResult.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { rawResult ->
 
-            // Kita ambil status diabetes dari LiveData satunya lagi biar gampang if-else nya
-            val isDiabetic = viewModel.isDiabeticDetected.value ?: false
+                loadingDialog.dismiss()
 
-            // Tampilkan Dialog dengan hasil ASLI dari AI
-            showResultDialog(isDiabetic, resultText)
+                val cleanResult = rawResult
+                    .replace("⚠️", "")
+                    .replace("✅", "")
+                    .replace("❓", "")
+                    .trim()
 
-            // Simpan gambar otomatis kalau mau (Opsional)
-            currentImageUri?.let { viewModel.saveImage(it) }
+                val isSevere = isSevereCondition(cleanResult)
+
+                showResultDialog(cleanResult, isSevere)
+
+                // Simpan gambar otomatis setelah analisis selesai
+                currentImageUri?.let { viewModel.saveImage(it) }
+            }
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-        if (bottomNav.selectedItemId != R.id.nav_camera) {
-            bottomNav.selectedItemId = R.id.nav_camera
+    private fun isSevereCondition(resultText: String): Boolean {
+        val dangerousKeywords = listOf(
+            "Diabetic Wounds", "Burns", "Pressure Wounds",
+            "Surgical Wounds", "Venous Wounds", "Laseration"
+        )
+        return dangerousKeywords.any { resultText.contains(it, ignoreCase = true) }
+    }
+
+    private fun showResultDialog(resultText: String, isSevere: Boolean) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_result, null)
+        val builder = AlertDialog.Builder(this)
+        val dialog = builder.create()
+
+        // Bind View dari layout XML Dialog Baru
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
+        val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
+        val btnNegative = dialogView.findViewById<MaterialButton>(R.id.btnDialogNegative)
+        val ivIcon = dialogView.findViewById<ImageView>(R.id.ivResultIcon)
+
+        if (isSevere) {
+            tvTitle.text = "PERHATIAN MEDIS"
+            tvTitle.setTextColor(Color.RED)
+            tvMessage.text = "$resultText\n\nREKOMENDASI:\nTerdeteksi luka berisiko tinggi. Segera konsultasikan ke dokter."
+
+            // Ubah icon jadi merah/warning
+            ivIcon.setColorFilter(Color.RED)
+            ivIcon.setImageResource(android.R.drawable.stat_sys_warning)
+
+            btnPositive.text = "Cari Rumah Sakit"
+            btnPositive.setIconResource(android.R.drawable.ic_dialog_map)
+            btnPositive.backgroundTintList = getColorStateList(R.color.red_btn_color) // Pastikan punya warna merah atau pakai Color.RED
+
+            btnPositive.setOnClickListener {
+                dialog.dismiss()
+                openGoogleMaps()
+            }
+
+            // Tampilkan tombol kembali untuk kondisi parah
+            btnNegative.visibility = ViewGroup.VISIBLE
+            btnNegative.text = "Kembali"
+            btnNegative.setOnClickListener { dialog.dismiss() }
+
+        } else {
+            tvTitle.text = "HASIL ANALISIS"
+            tvTitle.setTextColor(Color.parseColor("#009688")) // Teal
+            tvMessage.text = "$resultText\n\nSARAN:\nLuka tampak ringan. Jaga kebersihan dan pantau secara berkala."
+
+            // Ubah icon jadi hijau/info
+            ivIcon.setColorFilter(Color.parseColor("#009688"))
+
+            btnPositive.text = "Mengerti"
+            btnPositive.setOnClickListener { dialog.dismiss() }
+
+            btnNegative.visibility = ViewGroup.GONE
+        }
+
+        dialog.setView(dialogView)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.show()
+    }
+
+    private fun openGoogleMaps() {
+        val gmmIntentUri = Uri.parse("geo:0,0?q=Rumah+Sakit+Terdekat")
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+
+        try {
+            startActivity(mapIntent)
+        } catch (e: Exception) {
+            val browserIntent = Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://www.google.com/maps/search/Rumah+Sakit+Terdekat"))
+            startActivity(browserIntent)
         }
     }
 
     private fun onImageSelected(uri: Uri) {
         currentImageUri = uri
+
+        // Tampilkan gambar di card
         ivWoundImage.setImageURI(uri)
+
+        // Sembunyikan placeholder text/icon jika ada (Opsional, tergantung struktur layout)
+        findViewById<LinearLayout>(R.id.layoutPlaceholder)?.visibility = ViewGroup.GONE
+
+        // Enable tombol analisis
         btnStartAnalysis.isEnabled = true
     }
 
     private fun showImageSourceDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_image_source, null)
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Pilih Sumber")
-        builder.setItems(arrayOf("Kamera", "Galeri")) { _, which ->
-            if (which == 0) {
-                val intent = Intent(this, CameraActivity::class.java)
-                cameraActivityLauncher.launch(intent)
-            } else {
-                galleryLauncher.launch("image/*")
-            }
-        }
-        builder.show()
-    }
-
-    // --- 3. DIALOG MENERIMA HASIL DARI AI, BUKAN RANDOM ---
-    private fun showResultDialog(isDiabetic: Boolean, detailText: String) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_result, null)
-        val builder = AlertDialog.Builder(this)
-        builder.setView(dialogView)
         val dialog = builder.create()
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
-        val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
-        val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
-
-        // Gunakan parameter isDiabetic yang dikirim dari ViewModel
-        if (isDiabetic) {
-            tvTitle.text = "Indikasi Ditemukan"
-            // Tampilkan detail text dari AI (misal: "Diabetic Wounds (85%)")
-            tvMessage.text = "$detailText\n\nSaran: Segera konsultasi ke dokter."
-        } else {
-            tvTitle.text = "Hasil Normal / Tidak Jelas"
-            tvMessage.text = "$detailText\n\nSaran: Tetap jaga kebersihan luka."
+        dialogView.findViewById<MaterialButton>(R.id.btnOpenCamera).setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(this, CameraActivity::class.java)
+            cameraActivityLauncher.launch(intent)
         }
 
-        btnPositive.setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<MaterialButton>(R.id.btnOpenGallery).setOnClickListener {
+            dialog.dismiss()
+            galleryLauncher.launch("image/*")
+        }
+
+        dialog.setView(dialogView)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.show()
     }
 
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -174,6 +244,14 @@ class AnalysisActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        if (bottomNav.selectedItemId != R.id.nav_camera) {
+            bottomNav.selectedItemId = R.id.nav_camera
         }
     }
 }
