@@ -2,13 +2,16 @@ package com.example.mapmidtermproject.activities
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
+import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,7 +30,7 @@ class AnalysisActivity : AppCompatActivity() {
     private lateinit var btnSelectImage: MaterialButton
     private lateinit var btnStartAnalysis: MaterialButton
 
-    // PERBAIKAN DI SINI: Ubah tipe dari MaterialButton ke ImageView
+    // UI Header: ImageView (sesuai perbaikan sebelumnya)
     private lateinit var btnViewGallery: ImageView
 
     private var currentImageUri: Uri? = null
@@ -54,7 +57,7 @@ class AnalysisActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this)[WoundViewModel::class.java]
 
-        // Setup Loading
+        // Setup Loading Dialog
         loadingDialog = ProgressDialog(this).apply {
             setMessage("Menganalisis Luka...")
             setCancelable(false)
@@ -64,13 +67,12 @@ class AnalysisActivity : AppCompatActivity() {
         ivWoundImage = findViewById(R.id.ivWoundImage)
         btnSelectImage = findViewById(R.id.btnSelectImage)
         btnStartAnalysis = findViewById(R.id.btnStartAnalysis)
+        btnViewGallery = findViewById(R.id.btnViewGallery) // ImageView
 
-        // Casting ke ImageView (sesuai layout baru)
-        btnViewGallery = findViewById(R.id.btnViewGallery)
-
+        // Listeners
         btnSelectImage.setOnClickListener { showImageSourceDialog() }
 
-        // Listener jika user klik area placeholder gambar
+        // Klik area card placeholder juga memicu dialog pilih gambar
         findViewById<ViewGroup>(R.id.cardWoundImage).setOnClickListener { showImageSourceDialog() }
 
         btnStartAnalysis.setOnClickListener {
@@ -115,6 +117,39 @@ class AnalysisActivity : AppCompatActivity() {
         }
     }
 
+    // --- ANIMASI SAAT GAMBAR DIPILIH ---
+    private fun onImageSelected(uri: Uri) {
+        currentImageUri = uri
+
+        // 1. Sembunyikan Placeholder (Kotak garis putus-putus)
+        val layoutPlaceholder = findViewById<LinearLayout>(R.id.layoutPlaceholder)
+        layoutPlaceholder?.visibility = View.GONE
+
+        // 2. Set Gambar ke ImageView
+        ivWoundImage.setImageURI(uri)
+
+        // 3. Animasi "Pop" (Fade In + Scale Up + Overshoot)
+        // Set kondisi awal
+        ivWoundImage.alpha = 0f
+        ivWoundImage.scaleX = 0.8f
+        ivWoundImage.scaleY = 0.8f
+
+        // Jalankan animasi
+        ivWoundImage.animate()
+            .alpha(1f)       // Muncul pelan
+            .scaleX(1f)      // Membesar ke normal
+            .scaleY(1f)      // Membesar ke normal
+            .setDuration(600)
+            .setInterpolator(OvershootInterpolator()) // Efek membal
+            .start()
+
+        // 4. Update Tombol
+        btnStartAnalysis.isEnabled = true
+
+        // (Opsional) Ubah warna tombol jadi Teal terang saat aktif agar user tahu
+        btnStartAnalysis.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#009688"))
+    }
+
     private fun isSevereCondition(resultText: String): Boolean {
         val dangerousKeywords = listOf(
             "Diabetic Wounds", "Burns", "Pressure Wounds",
@@ -128,7 +163,6 @@ class AnalysisActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         val dialog = builder.create()
 
-        // Bind View dari layout XML Dialog Baru
         val tvTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
         val tvMessage = dialogView.findViewById<TextView>(R.id.tvDialogMessage)
         val btnPositive = dialogView.findViewById<MaterialButton>(R.id.btnDialogPositive)
@@ -146,7 +180,8 @@ class AnalysisActivity : AppCompatActivity() {
 
             btnPositive.text = "Cari Rumah Sakit"
             btnPositive.setIconResource(android.R.drawable.ic_dialog_map)
-            btnPositive.backgroundTintList = getColorStateList(R.color.red_btn_color) // Pastikan punya warna merah atau pakai Color.RED
+            // Pastikan Anda punya color resource ini atau gunakan Color.RED
+            btnPositive.backgroundTintList = ColorStateList.valueOf(Color.RED)
 
             btnPositive.setOnClickListener {
                 dialog.dismiss()
@@ -189,19 +224,6 @@ class AnalysisActivity : AppCompatActivity() {
                 Uri.parse("https://www.google.com/maps/search/Rumah+Sakit+Terdekat"))
             startActivity(browserIntent)
         }
-    }
-
-    private fun onImageSelected(uri: Uri) {
-        currentImageUri = uri
-
-        // Tampilkan gambar di card
-        ivWoundImage.setImageURI(uri)
-
-        // Sembunyikan placeholder text/icon jika ada (Opsional, tergantung struktur layout)
-        findViewById<LinearLayout>(R.id.layoutPlaceholder)?.visibility = ViewGroup.GONE
-
-        // Enable tombol analisis
-        btnStartAnalysis.isEnabled = true
     }
 
     private fun showImageSourceDialog() {
