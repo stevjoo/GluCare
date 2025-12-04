@@ -96,7 +96,7 @@
                                 android:lineSpacingExtra="2dp"
                                 android:textColor="#E65100"
                                 android:textStyle="bold"
-                                android:text="Tips: Input data 1 jam setelah makan untuk hasil akurat."/>
+                                android:text="Tips: Input data 2 setelah makan untuk hasil yang lebih akurat."/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
