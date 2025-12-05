@@ -28,6 +28,7 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -73,7 +74,6 @@ class MainActivity : AppCompatActivity() {
         setupChart()
         setupBottomNavigation()
 
-        // Tombol View All (Lihat Semua History)
         findViewById<TextView>(R.id.tvViewAllHistory).setOnClickListener {
             startActivity(Intent(this, AllWoundHistoryActivity::class.java))
         }
@@ -101,8 +101,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // --- FIX NAVIGASI ---
-    // Tambahkan onResume untuk memastikan tab "Beranda" selalu aktif saat kembali ke halaman ini
     override fun onResume() {
         super.onResume()
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
@@ -140,7 +138,6 @@ class MainActivity : AppCompatActivity() {
 
         etLabel.setText(item.label)
 
-        // Set Progress
         val percent = (item.confidence * 100).toInt()
         progressDetail.progress = percent
         tvDetailPercent.text = "$percent%"
@@ -153,7 +150,6 @@ class MainActivity : AppCompatActivity() {
             tvDetailPercent.setTextColor(getColor(android.R.color.holo_orange_dark))
         }
 
-        // Set Date
         if (item.timestamp != null) {
             val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
             tvDetailDate.text = sdf.format(item.timestamp)
@@ -201,13 +197,32 @@ class MainActivity : AppCompatActivity() {
         barChart.setDrawBarShadow(false)
         barChart.setDrawBorders(false)
 
+        // Offset bawah untuk label
+        barChart.extraBottomOffset = 20f
+
+        // --- KONFIGURASI SCROLLING ---
+        barChart.setTouchEnabled(true)
+        barChart.isDragEnabled = true
+        barChart.setScaleEnabled(false)
+        barChart.setPinchZoom(false)
+
         val xAxis = barChart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
         xAxis.textColor = Color.DKGRAY
 
-        barChart.axisLeft.setDrawGridLines(true)
+        // PERBAIKAN: Label lurus (0 derajat)
+        xAxis.labelRotationAngle = 0f
+
+        // HAPUS BARIS INI KARENA MENYEBABKAN CRASH:
+        // xAxis.isWordWrapEnabled = true
+
+        val axisLeft = barChart.axisLeft
+        axisLeft.setDrawGridLines(true)
+        axisLeft.axisMinimum = 0f
+        axisLeft.granularity = 1f
+
         barChart.axisRight.isEnabled = false
         barChart.legend.isEnabled = false
     }
@@ -223,17 +238,39 @@ class MainActivity : AppCompatActivity() {
         var index = 0f
         for ((label, count) in stats) {
             entries.add(BarEntry(index, count.toFloat()))
+
+            // Kita biarkan string apa adanya.
+            // Karena kita akan memperbesar tampilan (zoom/limit view),
+            // teks yang panjang akan memiliki ruang yang cukup.
             labels.add(label)
+
             index++
         }
 
         val dataSet = BarDataSet(entries, "Wound Types")
         dataSet.colors = listOf(getColor(R.color.blue), Color.parseColor("#4DB6AC"))
         dataSet.valueTextSize = 12f
+
+        dataSet.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return value.toInt().toString()
+            }
+        }
+
         val data = BarData(dataSet)
-        data.barWidth = 0.6f
+        data.barWidth = 0.5f
+
         barChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         barChart.data = data
+
+        // --- VISUAL CUE UNTUK SCROLL ---
+        // PENTING: Angka 3f artinya layar hanya menampilkan 3 batang penuh
+        // dan setengah batang ke-4. Ini memberi efek visual bahwa grafik
+        // terpotong dan bisa digeser (scrollable).
+        barChart.setVisibleXRangeMaximum(3f)
+
+        barChart.moveViewToX(0f)
+
         barChart.invalidate()
         barChart.animateY(1000)
     }
