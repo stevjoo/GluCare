@@ -47,4 +47,11 @@ class LogViewModel : ViewModel() {
         super.onCleared()
         stopListening()
     }
+
+    fun updateLog(logId: String, food: String, sugar: Int, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        // Kita panggil FirestoreHelper langsung atau via Repository (disini langsung ke Helper agar ringkas sesuai pola sebelumnya)
+        com.example.mapmidtermproject.utils.FirestoreHelper.updateFoodLog(logId, food, sugar, onSuccess) { e ->
+            onFailure(e.message ?: "Gagal update")
+        }
+    }
 }

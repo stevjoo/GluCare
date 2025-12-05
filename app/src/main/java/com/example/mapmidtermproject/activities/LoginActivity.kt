@@ -4,17 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mapmidtermproject.R
-// Hapus UserRepository, ganti dengan FirestoreHelper
 import com.example.mapmidtermproject.utils.FirestoreHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
+// HAPUS IMPORT INI: import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -25,7 +25,8 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var btnGoogleSignIn: SignInButton
+    // UBAH TIPE DARI SignInButton MENJADI Button (atau MaterialButton)
+    private lateinit var btnGoogleSignIn: Button
     private lateinit var progressBar: ProgressBar
 
     private val googleSignInLauncher = registerForActivityResult(
@@ -51,6 +52,8 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         auth = Firebase.auth
+
+        // Casting ke Button biasa sudah cukup karena MaterialButton adalah turunan Button
         btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
         progressBar = findViewById(R.id.progressBar)
 
@@ -74,11 +77,7 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // --- PERBAIKAN DISINI ---
-                    // Jangan pakai UserRepository.upsertUser(u) karena itu menimpa data.
-                    // Pakai ini agar data lama (No HP) tetap aman:
                     FirestoreHelper.initUserDataIfNew()
-                    // ------------------------
 
                     Toast.makeText(this, "Login Berhasil!", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this, MainActivity::class.java)

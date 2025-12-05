@@ -18,29 +18,28 @@ class LocalGalleryActivity : AppCompatActivity() {
     private lateinit var viewModel: WoundViewModel
     private lateinit var adapter: LocalImageAdapter
 
-    // PERBAIKAN 1: Ganti TextView menjadi LinearLayout (sesuai XML baru)
+    // PERBAIKAN: Deklarasikan sebagai properti kelas agar bisa diakses di mana saja dalam kelas ini
     private lateinit var layoutEmptyState: LinearLayout
+    private lateinit var rvGallery: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_gallery)
 
         val btnBack = findViewById<ImageView>(R.id.btnBack)
-        val rvGallery = findViewById<RecyclerView>(R.id.rvGallery)
 
-        // PERBAIKAN 2: Bind ke ID layoutEmptyState yang baru dibuat di XML
+        // Inisialisasi properti kelas
+        rvGallery = findViewById(R.id.rvGallery)
         layoutEmptyState = findViewById(R.id.layoutEmptyState)
 
         btnBack.setOnClickListener {
             finish()
-            // Opsional: Animasi keluar agar smooth (Slide ke kanan)
             overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
 
         // Setup RecyclerView
-        rvGallery.layoutManager = GridLayoutManager(this, 2) // Grid 2 Kolom
+        rvGallery.layoutManager = GridLayoutManager(this, 2)
         adapter = LocalImageAdapter { localImage ->
-            // Logic Hapus
             AlertDialog.Builder(this)
                 .setTitle("Hapus Foto?")
                 .setMessage("Foto ini akan dihapus permanen dari aplikasi.")
@@ -52,13 +51,12 @@ class LocalGalleryActivity : AppCompatActivity() {
         }
         rvGallery.adapter = adapter
 
-        // Setup ViewModel
         viewModel = ViewModelProvider(this)[WoundViewModel::class.java]
 
         // Observe Data
         viewModel.woundImages.observe(this) { images ->
             if (images.isEmpty()) {
-                // PERBAIKAN 3: Kontrol visibilitas Layout Empty State
+                // Sekarang rvGallery dan layoutEmptyState sudah dikenali
                 layoutEmptyState.visibility = View.VISIBLE
                 rvGallery.visibility = View.GONE
             } else {
@@ -68,11 +66,9 @@ class LocalGalleryActivity : AppCompatActivity() {
             }
         }
 
-        // Load data awal
         viewModel.loadImages()
     }
 
-    // Opsional: Handle tombol Back fisik di HP
     override fun onBackPressed() {
         super.onBackPressed()
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)

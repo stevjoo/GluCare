@@ -2,7 +2,6 @@ package com.example.mapmidtermproject.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import com.google.android.material.textfield.TextInputEditText
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +23,6 @@ import com.google.firebase.ktx.Firebase
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    // Di XML kamu menggunakan TextInputEditText, bukan TextView biasa
     private lateinit var etUsername: TextInputEditText
     private lateinit var etPhone: TextInputEditText
     private lateinit var viewModel: UserViewModel
@@ -36,19 +34,14 @@ class SettingsActivity : AppCompatActivity() {
         auth = Firebase.auth
         viewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
-        // --- BINDING ID SESUAI XML TERBARU ---
         etUsername = findViewById(R.id.et_username)
         etPhone = findViewById(R.id.et_phone)
 
-        // Tombol menu sekarang menggunakan ConstraintLayout (cl_...)
         val btnAccount = findViewById<ConstraintLayout>(R.id.cl_menu_account)
         val btnFAQ = findViewById<ConstraintLayout>(R.id.cl_menu_faq)
         val btnPrivacyPolicy = findViewById<ConstraintLayout>(R.id.cl_menu_privacy)
-
-        // Tombol logout ID-nya btn_logout
         val btnLogout = findViewById<Button>(R.id.btn_logout)
 
-        // Agar EditText hanya untuk tampilan (read-only) di halaman ini:
         etUsername.keyListener = null
         etPhone.keyListener = null
 
@@ -62,7 +55,6 @@ class SettingsActivity : AppCompatActivity() {
             val googleName = currentUser?.displayName ?: "Pengguna"
 
             if (profile != null) {
-                // setText tetap bekerja untuk EditText
                 etUsername.setText(if (!profile.username.isNullOrEmpty()) profile.username else googleName)
                 etPhone.setText(if (!profile.phone.isNullOrEmpty()) profile.phone else "Belum diatur")
             } else {
@@ -96,10 +88,7 @@ class SettingsActivity : AppCompatActivity() {
                     startActivity(Intent(this, LogActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
                     true
                 }
-                R.id.nav_camera -> {
-                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    true
-                }
+                // HAPUS CASE nav_camera
                 R.id.nav_settings -> true
                 else -> false
             }

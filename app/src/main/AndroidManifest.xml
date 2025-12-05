@@ -39,21 +39,18 @@
         </activity>
 
         <activity android:name=".activities.LoginActivity" android:exported="false" />
-        <activity android:name=".activities.NewsDetailActivity" android:exported="false" />
-        <activity android:name=".activities.AllNewsActivity" android:exported="false" />
         <activity android:name=".activities.AnalysisActivity" android:exported="false" />
         <activity android:name=".activities.LocationActivity" android:exported="false" />
-
-        <!-- Activity Jurnal (Log) -->
         <activity android:name=".activities.LogActivity" android:exported="false" />
+        <activity android:name=".activities.AllWoundHistoryActivity" android:exported="false" />
+
+        <!-- INI YANG KURANG TADI -->
+        <activity android:name=".activities.AllFoodLogActivity" android:exported="false" />
 
         <activity
             android:name=".activities.CameraActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-
-        <!-- ACTIVITY BARU: GALERI LOKAL (Tambahkan ini agar tidak crash) -->
-        <activity android:name=".activities.LocalGalleryActivity" android:exported="false" />
 
         <activity android:name=".settings.SettingsActivity" android:exported="false" />
         <activity android:name=".settings.AccountSettingsActivity" android:exported="false" />

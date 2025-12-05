@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.mapmidtermproject.models.WoundAnalysis
 import com.example.mapmidtermproject.repositories.LocalWoundImage
 import com.example.mapmidtermproject.repositories.WoundRepository
 import com.example.mapmidtermproject.utils.Event
@@ -14,26 +15,89 @@ import java.io.File
 class WoundViewModel(application: Application) : AndroidViewModel(application), WoundClassifierHelper.ClassifierListener {
 
     private val repository = WoundRepository(application.applicationContext)
+    private val woundClassifier = WoundClassifierHelper(application.applicationContext, this)
 
-    private val _woundImages = MutableLiveData<List<LocalWoundImage>>()
-    val woundImages: LiveData<List<LocalWoundImage>> get() = _woundImages
+    // --- DATA UNTUK MAIN ACTIVITY ---
+    private val _historyList = MutableLiveData<List<WoundAnalysis>>()
+    val historyList: LiveData<List<WoundAnalysis>> = _historyList
 
-    // MENGGUNAKAN EVENT WRAPPER UNTUK HASIL ANALISIS
+    private val _statsData = MutableLiveData<Map<String, Int>>()
+    val statsData: LiveData<Map<String, Int>> = _statsData
+
+    // --- DATA ANALYSIS ACTIVITY ---
     private val _analysisResult = MutableLiveData<Event<String>>()
     val analysisResult: LiveData<Event<String>> get() = _analysisResult
 
     private val _isDiabeticDetected = MutableLiveData<Boolean>()
     val isDiabeticDetected: LiveData<Boolean> get() = _isDiabeticDetected
 
-    private val woundClassifier = WoundClassifierHelper(application.applicationContext, this)
+    // Local Gallery (Legacy)
+    private val _woundImages = MutableLiveData<List<LocalWoundImage>>()
+    val woundImages: LiveData<List<LocalWoundImage>> = _woundImages
+
+    // Variabel sementara untuk menyimpan hasil scan terakhir sebelum user klik save
+    var lastLabel: String = ""
+    var lastConfidence: Float = 0f
+
+    // 1. LOAD HISTORY (Dipanggil di MainActivity)
+    fun loadHistory() {
+        repository.getWoundHistory { list ->
+            _historyList.value = list
+            calculateStats(list) // Hitung statistik untuk grafik
+        }
+    }
+
+    // 2. HITUNG STATISTIK (Untuk Bar Chart)
+    private fun calculateStats(list: List<WoundAnalysis>) {
+        // Mengelompokkan berdasarkan Label dan menghitung jumlahnya
+        val stats = list.groupingBy { it.label }.eachCount()
+        _statsData.value = stats
+    }
+
+    // 3. ANALISIS GAMBAR (Dipanggil di AnalysisActivity)
+    fun analyzeImage(uri: Uri) {
+        woundClassifier.classify(uri)
+    }
+
+    // Callback dari ML Helper
+    override fun onResults(label: String, score: Float) {
+        // Simpan sementara di memori
+        lastLabel = label
+        lastConfidence = score
+
+        val scorePercent = score * 100
+        val isDiabetic = label.contains("Diabetic", ignoreCase = true) ||
+                label.contains("Ulcer", ignoreCase = true)
+
+        _isDiabeticDetected.postValue(isDiabetic)
+
+        val textResult = if (score < 0.50f) {
+            "❓ Tidak Yakin (${String.format("%.1f", scorePercent)}%)\nCoba foto ulang."
+        } else {
+            "$label\n(Akurasi: ${String.format("%.1f", scorePercent)}%)"
+        }
+        _analysisResult.postValue(Event(textResult))
+    }
+
+    override fun onError(error: String) {
+        _analysisResult.postValue(Event("Error: $error"))
+    }
+
+    // 4. SIMPAN HASIL (Local + Firestore)
+    fun saveResult(uri: Uri) {
+        // Simpan ke File Lokal
+        val localPath = repository.saveImageToInternalStorage(uri)
+
+        // Jika sukses simpan lokal, simpan metadatanya ke Firestore
+        if (localPath != null && lastLabel.isNotEmpty()) {
+            repository.saveAnalysisResult(lastLabel, lastConfidence, localPath)
+        }
+        // Refresh local gallery data
+        loadImages()
+    }
 
     fun loadImages() {
         _woundImages.postValue(repository.getAllImages())
-    }
-
-    fun saveImage(uri: Uri) {
-        repository.saveImageToInternalStorage(uri)
-        loadImages()
     }
 
     fun deleteImage(file: File) {
@@ -41,38 +105,22 @@ class WoundViewModel(application: Application) : AndroidViewModel(application), 
         loadImages()
     }
 
-    fun analyzeImage(uri: Uri) {
-        // Kita tidak mengirim status loading ke LiveData result agar tidak membingungkan Event
-        // Loading ditangani oleh Activity
-        woundClassifier.classify(uri)
+    // (Tambahkan fungsi ini ke dalam class WoundViewModel yang sudah ada)
+
+    fun updateWoundLabel(item: WoundAnalysis, newLabel: String) {
+        repository.updateAnalysisLabel(item.id, newLabel)
     }
 
-    // --- CALLBACK DARI HELPER ---
-    override fun onResults(label: String, score: Float) {
-        val scorePercent = score * 100
-
-        // Ambang batas keyakinan (Threshold)
-        if (score < 0.50f) {
-            val message = "❓ Hasil meragukan (${String.format("%.1f", scorePercent)}%)\nCoba foto ulang lebih jelas."
-            _isDiabeticDetected.postValue(false)
-            _analysisResult.postValue(Event(message)) // Bungkus dengan Event
-            return
+    fun deleteWoundItem(item: WoundAnalysis) {
+        // 1. Hapus File Lokal jika ada
+        if (item.localImagePath.isNotEmpty()) {
+            val file = File(item.localImagePath)
+            if (file.exists()) {
+                file.delete()
+            }
         }
 
-        val isDiabetic = label.contains("Diabetic", ignoreCase = true)
-        _isDiabeticDetected.postValue(isDiabetic)
-
-        val textResult = if (isDiabetic) {
-            "⚠️ Terdeteksi: $label\n(Confidence: ${String.format("%.1f", scorePercent)}%)"
-        } else {
-            "✅ Terdeteksi: Luka Non-Diabetes ($label)\n(Confidence: ${String.format("%.1f", scorePercent)}%)"
-        }
-
-        _analysisResult.postValue(Event(textResult)) // Bungkus dengan Event
-    }
-
-    override fun onError(error: String) {
-        _isDiabeticDetected.postValue(false)
-        _analysisResult.postValue(Event("Gagal: $error")) // Bungkus dengan Event
+        // 2. Hapus Data di Firestore
+        repository.deleteAnalysis(item.id)
     }
 }

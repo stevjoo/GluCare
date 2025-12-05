@@ -18,8 +18,10 @@
         android:gravity="center_vertical"
         android:padding="16dp">
 
-        <!-- 1. Ikon Dekoratif (Lingkaran Biru Muda) -->
+        <!-- 1. Ikon Dekoratif Status -->
+        <!-- DIBERI ID: cvStatusIcon -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvStatusIcon"
             android:layout_width="48dp"
             android:layout_height="48dp"
             app:cardCornerRadius="24dp"
@@ -28,7 +30,9 @@
             app:strokeWidth="0dp"
             android:layout_marginEnd="16dp">
 
+            <!-- DIBERI ID: ivStatusIcon -->
             <ImageView
+                android:id="@+id/ivStatusIcon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
@@ -90,7 +94,7 @@
                 android:alpha="0.8"/>
         </LinearLayout>
 
-        <!-- 4. Tombol Hapus (Divider Vertikal Tipis) -->
+        <!-- 4. Tombol Hapus -->
         <View
             android:layout_width="1dp"
             android:layout_height="24dp"

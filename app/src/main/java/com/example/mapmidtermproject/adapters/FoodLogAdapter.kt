@@ -1,24 +1,26 @@
 package com.example.mapmidtermproject.adapters
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mapmidtermproject.R
 import com.example.mapmidtermproject.utils.FoodLog
+import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class FoodLogAdapter(
-    private val onDeleteClick: (FoodLog) -> Unit
+    private val onItemClick: (FoodLog) -> Unit
 ) : RecyclerView.Adapter<FoodLogAdapter.ViewHolder>() {
 
     private var logs = listOf<FoodLog>()
 
     fun submitList(newLogs: List<FoodLog>) {
-        // Urutkan dari yang terbaru (descending)
         logs = newLogs.sortedByDescending { it.timestamp }
         notifyDataSetChanged()
     }
@@ -27,18 +29,60 @@ class FoodLogAdapter(
         val tvFood: TextView = itemView.findViewById(R.id.tvFoodName)
         val tvSugar: TextView = itemView.findViewById(R.id.tvSugar)
         val tvDate: TextView = itemView.findViewById(R.id.tvDate)
+
+        // Komponen Status Baru
+        val cvStatusIcon: MaterialCardView = itemView.findViewById(R.id.cvStatusIcon)
+        val ivStatusIcon: ImageView = itemView.findViewById(R.id.ivStatusIcon)
+
         val btnDelete: ImageView = itemView.findViewById(R.id.btnDelete)
+
+        init {
+            itemView.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    onItemClick(logs[adapterPosition])
+                }
+            }
+            btnDelete.setOnClickListener {
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    onItemClick(logs[adapterPosition])
+                }
+            }
+        }
 
         fun bind(log: FoodLog) {
             tvFood.text = log.foodName
-            tvSugar.text = "${log.bloodSugar} mg/dL"
+            tvSugar.text = "${log.bloodSugar}"
 
             val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
             tvDate.text = sdf.format(log.timestamp)
 
-            btnDelete.setOnClickListener {
-                onDeleteClick(log)
+            // --- LOGIKA STATUS GULA DARAH ---
+            val context = itemView.context
+
+            // Default: Aman (Hijau)
+            var iconRes = android.R.drawable.ic_input_add // Icon Centang Bawaan
+            var colorRes = R.color.status_safe
+            var bgRes = R.color.status_safe_bg
+
+            if (log.bloodSugar >= 200) {
+                // Bahaya (Merah)
+                iconRes = android.R.drawable.ic_delete // Icon Silang/Warning Bawaan
+                colorRes = R.color.status_danger
+                bgRes = R.color.status_danger_bg
+            } else if (log.bloodSugar >= 140) {
+                // Hati-hati (Oranye)
+                iconRes = android.R.drawable.stat_sys_warning // Icon Segitiga Warning Bawaan
+                colorRes = R.color.status_warning
+                bgRes = R.color.status_warning_bg
             }
+
+            // Terapkan Warna & Icon
+            ivStatusIcon.setImageResource(iconRes)
+            ivStatusIcon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
+            cvStatusIcon.setCardBackgroundColor(ContextCompat.getColor(context, bgRes))
+
+            // Ubah warna teks angka gula darah juga agar senada
+            tvSugar.setTextColor(ContextCompat.getColor(context, colorRes))
         }
     }
 
