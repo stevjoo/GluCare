@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="50dp">
+            android:paddingBottom="5dp">
 
             <!-- HEADER USER -->
             <LinearLayout
@@ -154,7 +154,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="24dp"
-        android:text="Cek Luka Baru"
+        android:text="Cek Luka"
         android:textColor="@color/white_primary"
         android:textStyle="bold"
         app:icon="@drawable/ic_camera_24"
