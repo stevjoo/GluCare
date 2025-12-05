@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/white"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- KIRI: Circular Progress -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp">
+
+            <!-- Background Circle -->
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:trackColor="#E0E0E0"
+                app:indicatorColor="#E0E0E0"
+                android:progress="100"
+                app:trackThickness="4dp"
+                app:indicatorSize="48dp"/>
+
+            <!-- Foreground Circle (Progress actual) -->
+            <!-- Menambahkan app:indicatorDirectionCircular="clockwise" -->
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressConfidence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:trackColor="@android:color/transparent"
+                app:indicatorColor="@color/blue"
+                tools:progress="75"
+                app:trackThickness="4dp"
+                app:indicatorSize="48dp"
+                app:indicatorDirectionCircular="clockwise"/>
+
+            <!-- Teks Persentase -->
+            <TextView
+                android:id="@+id/tvProgressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                tools:text="75%"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/blue"/>
+        </FrameLayout>
+
+        <!-- TENGAH: Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvHistoryLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Diabetic Wound"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/tvHistoryDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="12 Nov 2025, 10:00"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <!-- KANAN: Panah -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_right"
+            app:tint="@color/blue_light"/>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

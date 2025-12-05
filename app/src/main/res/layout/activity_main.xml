@@ -9,12 +9,10 @@
     android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity">
 
-    <!-- Konten Scrollable -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        android:clipToPadding="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,9 +22,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:paddingBottom="5dp">
 
-            <!-- HEADER SECTION -->
+            <!-- HEADER USER -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,76 +50,120 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Jaga kesehatanmu hari ini."
+                        android:text="Pantau kesehatan kulitmu."
                         android:textSize="14sp"
                         android:textColor="#7F7F7F"/>
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="43dp"
-                    android:layout_height="44dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:src="@drawable/glucareicon" />
             </LinearLayout>
 
-            <!-- CAROUSEL SECTION -->
+            <!-- SECTION GRAFIK STATISTIK -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Statistik Analisis Luka"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="12dp"/>
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginBottom="24dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/white">
 
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/carouselViewPager"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="180dp" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"/>
+
+                    <TextView
+                        android:id="@+id/tvChartEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Belum ada data analisis."
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:textColor="@color/gray"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- NEWS HEADER -->
+            <!-- SECTION HEADER RIWAYAT & TOMBOL LIHAT SEMUA -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingHorizontal="24dp"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Artikel Terbaru"
+                    android:text="Riwayat Pengecekan"
                     android:textColor="#000"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvViewAll"
+                    android:id="@+id/tvViewAllHistory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Lihat Semua"
                     android:textColor="@color/blue"
                     android:textStyle="bold"
                     android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:background="?attr/selectableItemBackgroundBorderless"/>
             </LinearLayout>
 
-            <!-- NEWS LIST -->
+            <!-- LIST HISTORY (Maksimal 3 item via Adapter logic) -->
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvNews"
+                android:id="@+id/rvWoundHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:paddingHorizontal="16dp"
                 android:nestedScrollingEnabled="false" />
-            <!-- nestedScrollingEnabled=false PENTING agar scroll lancar di dalam NestedScrollView -->
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Navbar -->
+    <!-- FAB SCAN LUKA (POSISI FIXED DI KANAN BAWAH) -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/btnFabScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        android:text="Cek Luka"
+        android:textColor="@color/white_primary"
+        android:textStyle="bold"
+        app:icon="@drawable/ic_camera_24"
+        app:iconTint="@color/white_primary"
+        app:backgroundTint="@color/blue"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- NAVIGATION BAR (3 ITEM) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         style="@style/Widget.App.BottomNavigationView.NoRipple"

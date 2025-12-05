@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base -->
+    <!-- Warna Dasar -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
-    <!-- GluCare palette -->
-    <color name="white_primary">#EBFFFB</color>   <!-- page background -->
-    <color name="blue">#03989E</color>           <!-- brand teal / primary -->
-    <color name="blue_light">#04B0B7</color>     <!-- lighter teal for emphasis/active alt -->
-
-    <!-- Neutrals -->
+    <color name="white_primary">#EBFFFB</color>
+    <color name="blue">#03989E</color>
+    <color name="blue_light">#04B0B7</color>
     <color name="gray">#A6A6A6</color>
-    <color name="gray_light">#D9D9D9</color>     <!-- disabled bg -->
+    <color name="gray_light">#D9D9D9</color>
     <color name="gray_text_disabled">#7F7F7F</color>
 
-    <!-- Semantic buttons (recommended) -->
-    <color name="primary_active">#4ACFD0</color>   <!-- active action button -->
-    <color name="primary_disabled">@color/gray_light</color>
+    <!-- Warna Status Gula Darah (BARU) -->
+    <color name="status_safe">#4CAF50</color>       <!-- Hijau -->
+    <color name="status_safe_bg">#E8F5E9</color>
 
-    <!-- Compatibility aliases (legacy refs) -->
-    <color name="gc_teal">@color/blue</color>
-    <color name="gc_disabled_text">@color/gray_text_disabled</color>
-    <color name="gc_grey">@color/gray_light</color>
+    <color name="status_warning">#FF9800</color>    <!-- Oranye -->
+    <color name="status_warning_bg">#FFF3E0</color>
 
-    <color name="red_btn_color">#D32F2F</color>
+    <color name="status_danger">#F44336</color>     <!-- Merah -->
+    <color name="status_danger_bg">#FFEBEE</color>
 </resources>

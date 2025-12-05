@@ -3,7 +3,9 @@ package com.example.mapmidtermproject.activities
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -59,14 +61,25 @@ class LogActivity : AppCompatActivity() {
         val toggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.toggleGroup)
         val rvLogs = findViewById<RecyclerView>(R.id.rvFoodLogs)
 
+        // VIEW ALL BUTTON
+        val tvViewAllLogs = findViewById<TextView>(R.id.tvViewAllLogs)
+        tvViewAllLogs.setOnClickListener {
+            startActivity(Intent(this, AllFoodLogActivity::class.java))
+        }
+
         rvLogs.layoutManager = LinearLayoutManager(this)
-        adapter = FoodLogAdapter { log -> showDeleteDialog(log) }
+
+        // Adapter Click -> Show Edit Dialog
+        adapter = FoodLogAdapter { log -> showEditDialog(log) }
         rvLogs.adapter = adapter
 
         viewModel.logs.observe(this) { logs ->
             allLogs = logs
             applyFilter()
-            adapter.submitList(logs)
+
+            // LIMIT 5 UNTUK HALAMAN UTAMA LOG (ambil 5 terbaru)
+            val limitedLogs = logs.sortedByDescending { it.timestamp }.take(5)
+            adapter.submitList(limitedLogs)
         }
 
         setupChart()
@@ -133,26 +146,17 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    // --- NAVIGASI YANG SUDAH DIPERBAIKI (ANIMASI AKTIF) ---
     private fun setupBottomNavigation() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottom_navigation)
-
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
                     startActivity(Intent(this, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition AGAR ANIMASI FADE JALAN
                     true
                 }
                 R.id.nav_log -> true
-                R.id.nav_camera -> {
-                    startActivity(Intent(this, AnalysisActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
-                    true
-                }
                 R.id.nav_settings -> {
                     startActivity(Intent(this, SettingsActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT })
-                    // HAPUS overridePendingTransition
                     true
                 }
                 else -> false
@@ -160,16 +164,60 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    private fun showDeleteDialog(log: FoodLog) {
-        AlertDialog.Builder(this)
-            .setTitle("Hapus Catatan?")
-            .setMessage("Yakin ingin menghapus ${log.foodName}?")
-            .setPositiveButton("Hapus") { _, _ ->
-                viewModel.deleteLog(log.id, { Toast.makeText(this, "Terhapus", Toast.LENGTH_SHORT).show() }, { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() })
+    // --- DIALOG EDIT LOG ---
+    private fun showEditDialog(log: FoodLog) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_food_log, null)
+
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+        val dialog = builder.create()
+
+        // --- FIX TRANSPARENT BACKGROUND ---
+        // Ini kuncinya agar rounded corners CardView terlihat sempurna
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val etEditFood = dialogView.findViewById<TextInputEditText>(R.id.etEditFoodName)
+        val etEditSugar = dialogView.findViewById<TextInputEditText>(R.id.etEditSugarLevel)
+        val btnUpdate = dialogView.findViewById<MaterialButton>(R.id.btnUpdateLog)
+        val btnDelete = dialogView.findViewById<MaterialButton>(R.id.btnDeleteLog)
+
+        // Isi data lama
+        etEditFood.setText(log.foodName)
+        etEditSugar.setText(log.bloodSugar.toString())
+
+        btnUpdate.setOnClickListener {
+            val newFood = etEditFood.text.toString()
+            val newSugar = etEditSugar.text.toString().toIntOrNull()
+
+            if (newFood.isNotEmpty() && newSugar != null) {
+                viewModel.updateLog(log.id, newFood, newSugar,
+                    onSuccess = {
+                        Toast.makeText(this, "Update berhasil", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    },
+                    onFailure = { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
+                )
             }
-            .setNegativeButton("Batal", null)
-            .show()
+        }
+
+        btnDelete.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Hapus?")
+                .setMessage("Yakin hapus data ini?")
+                .setPositiveButton("Ya") { _, _ ->
+                    viewModel.deleteLog(log.id,
+                        onSuccess = { dialog.dismiss() },
+                        onFailure = { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
+                    )
+                }
+                .setNegativeButton("Batal", null)
+                .show()
+        }
+
+        dialog.show()
     }
+
+    // --- CHART & FILTER FUNCTIONS ---
 
     private fun setupChart() {
         lineChart.description.isEnabled = false
@@ -216,15 +264,18 @@ class LogActivity : AppCompatActivity() {
         val entries = ArrayList<Entry>()
         val labels = ArrayList<String>()
         val dateFormat = if (currentFilterType == "DAY") SimpleDateFormat("HH:mm", Locale.getDefault()) else SimpleDateFormat("dd/MM", Locale.getDefault())
+
         sortedLogs.forEachIndexed { index, log ->
             entries.add(Entry(index.toFloat(), log.bloodSugar.toFloat()))
             labels.add(dateFormat.format(log.timestamp))
         }
+
         if (entries.isEmpty()) {
             lineChart.clear()
             lineChart.setNoDataText("Tidak ada data pada periode ini.")
             return
         }
+
         val dataSet = LineDataSet(entries, "Gula Darah (mg/dL)")
         dataSet.color = getColor(R.color.blue)
         dataSet.valueTextColor = Color.BLACK
@@ -233,9 +284,11 @@ class LogActivity : AppCompatActivity() {
         dataSet.setCircleColor(getColor(R.color.blue))
         dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
         dataSet.setDrawValues(false)
+
         val marker = CustomMarkerView(this, R.layout.custom_marker_view, sortedLogs)
         marker.chartView = lineChart
         lineChart.marker = marker
+
         lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
         lineChart.xAxis.granularity = 1f
         lineChart.data = LineData(dataSet)

@@ -13,7 +13,7 @@
         android:layout_height="0dp"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="80dp"
+        android:paddingBottom="30dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -96,7 +96,7 @@
                                 android:lineSpacingExtra="2dp"
                                 android:textColor="#E65100"
                                 android:textStyle="bold"
-                                android:text="Tips: Input data 2 setelah makan untuk hasil yang lebih akurat."/>
+                                android:text="Tips: Input data 2 jam setelah makan untuk hasil yang lebih akurat."/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -272,6 +272,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- BAGIAN HEADER LIST & VIEW ALL -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -288,6 +289,18 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="#212121"/>
+
+                <TextView
+                    android:id="@+id/tvViewAllLogs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lihat Semua"
+                    android:textColor="@color/blue"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
